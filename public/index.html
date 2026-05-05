@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Textile Inspection Hub</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background: #f0f0f0;
+    }
+
+    .page {
+      width: 100%;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border: 2px solid #000;
+    }
+
+    .main-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 10px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    .info-table td,
+    .info-table th {
+      border: 1px solid #000;
+      padding: 4px 6px;
+      vertical-align: middle;
+    }
+
+    .info-table .label {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .info-table input,
+    .info-table select {
+      border: none;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      font-size: 12px;
+    }
+
+    .section-header {
+      background: #ffd700;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid #000;
+      padding: 5px;
+      margin: 8px 0 0;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .gen-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .gen-table td,
+    .gen-table th {
+      border: 1px solid #000;
+      padding: 4px 6px;
+      vertical-align: middle;
+      width: 180px;
+    }
+
+    .gen-table th {
+      background: #ffd700;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .gen-table input,
+    .gen-table select,
+    .gen-table textarea {
+      border: none;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      font-size: 12px;
+      resize: none;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .result-pass {
+      background: #90ee90 !important;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .result-fail {
+      background: #ff9999 !important;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .result-pending {
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .sample-box {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .sample-box td {
+      border: 1px solid #000;
+      padding: 6px 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .sample-box input {
+      border: none;
+      outline: none;
+      font-weight: bold;
+      font-size: 12px;
+      width: 80px;
+      background: transparent;
+    }
+
+    .defect-num {
+      text-align: center;
+      width: 40px;
+    }
+
+    .defect-qty {
+      text-align: center;
+      width: 70px;
+    }
+
+    .remarks-area {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .remarks-area textarea {
+      width: 100%;
+      min-height: 60px;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      font-family: Arial;
+      resize: vertical;
+      background: transparent;
+    }
+
+    .images-section {
+      margin-top: 10px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .img-card {
+      border: 2px solid #000;
+      background: #fff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .img-card:hover {
+      border-color: #ffd700;
+    }
+
+    .img-preview {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #888;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid #ccc;
+      overflow: hidden;
+    }
+
+    .img-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .img-preview .upload-spinner {
+      display: none;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .img-caption {
+      padding: 4px 6px;
+      font-size: 11px;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      font-weight: bold;
+    }
+
+    .img-caption input {
+      border: none;
+      outline: none;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      background: transparent;
+    }
+
+    .img-label-input {
+      padding: 4px 6px;
+      font-size: 11px;
+    }
+
+    .img-label-input input {
+      border: none;
+      border-bottom: 1px dashed #999;
+      outline: none;
+      font-size: 11px;
+      width: 100%;
+      background: transparent;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    .btn-bar {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 28px;
+      border: 2px solid #000;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+
+    .btn-add {
+      background: #ffd700;
+    }
+
+    .btn-add:hover {
+      background: #e6c200;
+    }
+
+    .btn-save {
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    .btn-save:hover {
+      background: #27ae60;
+    }
+
+    .btn-load {
+      background: #3498db;
+      color: #fff;
+    }
+
+    .btn-load:hover {
+      background: #2980b9;
+    }
+
+    .btn-download {
+      background: #222;
+      color: #ffd700;
+    }
+
+    .btn-download:hover {
+      background: #000;
+    }
+
+    .btn-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: #ff4444;
+      color: #fff;
+      border: none;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: 2px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: #222;
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      z-index: 9999;
+      display: none;
+      border-left: 5px solid #ffd700;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .toast.error {
+      border-left-color: #ff4444;
+    }
+
+    .toast.success {
+      border-left-color: #2ecc71;
+    }
+
+    .saved-badge {
+      display: inline-block;
+      background: #2ecc71;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .list-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+    }
+
+    .list-modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .list-box {
+      background: #fff;
+      border: 2px solid #000;
+      padding: 20px;
+      width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: 4px;
+    }
+
+    .list-box h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #ffd700;
+      padding-bottom: 8px;
+    }
+
+    .insp-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 6px;
+      border-radius: 3px;
+    }
+
+    .insp-item:hover {
+      background: #fffde7;
+    }
+
+    .insp-item-info {
+      flex: 1;
+    }
+
+    .insp-item-info strong {
+      font-size: 13px;
+    }
+
+    .insp-item-info span {
+      font-size: 11px;
+      color: #888;
+      display: block;
+    }
+
+    .insp-item-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 11px;
+      border: 1px solid #000;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-sm-load {
+      background: #ffd700;
+    }
+
+    .btn-sm-del {
+      background: #ff9999;
+    }
+
+    .result-badge {
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .badge-pass {
+      background: #90ee90;
+    }
+
+    .badge-fail {
+      background: #ff9999;
+    }
+
+    .badge-pending {
+      background: #ffe0b2;
+    }
+
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0;
+      margin-left: 8px;
+    }
+
+    .radio-group input {
+      margin: 0;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="list-modal" id="listModal">
+    <div class="list-box">
+      <h2>Saved Inspections <button onclick="closeModal()"
+          style="float:right;background:#ff4444;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-weight:bold;">✕
+          Close</button></h2>
+      <div id="inspectionList"></div>
+    </div>
+  </div>
+
+  <div class="page" id="mainPage">
+    <div class="main-title">TEXTILE INSPECTION HUB
+      <span id="savedBadge" class="saved-badge" style="display:none;">Saved</span>
+    </div>
+
+    <!-- <div style="text-align:center;margin-bottom:10px;font-size:11px;color:#555;">
+      Current ID: <code id="currentId">—</code>
+    </div> -->
+
+    <table class="info-table">
+      <tr>
+        <td class="label" rowspan="3" style="width:140px;font-size:16px;text-align:center;background:#fff3cd;">
+          INSPECTION REPORT</td>
+        <td class="label" style="width:100px;">Buyer</td>
+        <td><input id="buyer" placeholder="e.g. Basic Supply"></td>
+        <td class="label" style="width:40px;">DPI</td>
+        <td><input id="dpi" placeholder=""></td>
+        <td class="label" style="width:40px;">FRI</td>
+        <td><input id="fri" placeholder="#"></td>
+      </tr>
+      <tr>
+        <td class="label">PO/Style #</td>
+        <td><input id="poStyle" placeholder=""></td>
+        <td class="label">Factory</td>
+        <td colspan="3"><input id="factory" placeholder="e.g. MIANOOR TEXTILE"></td>
+      </tr>
+      <tr>
+        <td class="label">Inspection Date</td>
+        <td><input id="inspDate" type="date"></td>
+        <td class="label">Unit</td>
+        <td colspan="3"><input id="unit" placeholder="#3"></td>
+      </tr>
+      <tr>
+        <td class="label">Re-Inspection</td>
+        <td><input id="reInspDate" type="date"></td>
+        <td colspan="5"></td>
+      </tr>
+    </table>
+
+    <table class="gen-table">
+      <tr>
+        <td class="label" style="width:170px;">Article:</td>
+        <td><input id="article" placeholder="e.g. Mens Short Sleeve Tee"></td>
+        <td class="label" style="width:130px;">AQL - Critical Def</td>
+        <td style="width:80px;"><input id="aqlCritical" placeholder="N/A"></td>
+      </tr>
+      <tr>
+        <td class="label">Colour:</td>
+        <td><input id="colour" placeholder="e.g. Black"></td>
+        <td class="label">AQL - Major Defect</td>
+        <td><input id="aqlMajor" placeholder="2.5"></td>
+      </tr>
+      <tr>
+        <td class="label">Order Quantity (Pcs):</td>
+        <td><input id="orderQtyPcs" placeholder="e.g. 27366 Pcs"></td>
+        <td class="label">AQL - Minor Defect</td>
+        <td><input id="aqlMinor" placeholder=""></td>
+      </tr>
+      <tr>
+        <td class="label">Offered Quantity (Pcs):</td>
+        <td><input id="offeredQtyPcs" placeholder="e.g. 27466 Pcs"></td>
+        <td class="label">Re-Inspection:</td>
+        <td>
+          <div class="radio-group">
+            <label>YES <input type="checkbox" id="reInspYes"></label>
+            <label>NO <input type="checkbox" id="reInspNo"></label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">Order Quantity (Cartons):</td>
+        <td><input id="orderQtyCtns" placeholder="e.g. 667 Ctns"></td>
+        <td class="label">Approved Sample:</td>
+        <td>
+          <div class="radio-group">
+            <label>YES <input type="checkbox" id="approvedYes"></label>
+            <label>NO <input type="checkbox" id="approvedNo"></label>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">Offered Quantity (Cartons):</td>
+        <td><input id="offeredQtyCtns" placeholder="e.g. 553 Ctns"></td>
+        <td class="label">Inspector Name:</td>
+        <td><input id="inspectorName" placeholder="e.g. Imran Baig & Naeem Ilyas"></td>
+      </tr>
+      <tr>
+        <td class="label">Units Per Carton:</td>
+        <td><input id="unitsPerCarton" placeholder="e.g. S to L 48 pcs"></td>
+        <td class="label">Inspection Location:</td>
+        <td><input id="inspLocation" placeholder="e.g. Site, Karachi"></td>
+      </tr>
+    </table>
+
+    <div class="section-header">INSPECTION OVERALL RESULT</div>
+    <table class="gen-table">
+      <tr>
+        <td class="result-pass" style="width:33%;" onclick="setResult('PASS')" id="resultPass">PASS</td>
+        <td class="result-fail" style="width:33%;" onclick="setResult('FAIL')" id="resultFail">FAIL, due to beyond AQL
+          and/or remark</td>
+        <td class="result-pending" style="width:33%;" onclick="setResult('PENDING')" id="resultPending">PENDING</td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding:6px;"><input id="resultNote" style="width:100%;border:none;outline:none;"
+            placeholder="Result note..."></td>
+      </tr>
+    </table>
+    <br>
+    <table class="sample-box">
+      <tr>
+        <td style="width:20%;">SAMPLE SIZE</td>
+        <td style="width:40%;">NO. OF PIECES: <input id="samplePcs" placeholder="e.g. 315"> pcs</td>
+        <td style="width:40%;">SELECTED CARTONS: <input id="selectedCartons" placeholder="e.g. 56"></td>
+      </tr>
+    </table>
+
+    <div class="section-header">CATEGORY CHECKLIST</div>
+    <table class="gen-table" id="categoryTable">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th style="width:80px;">OK</th>
+          <th style="width:80px;">NOT OK</th>
+          <th>Attachment</th>
+        </tr>
+      </thead>
+      <tbody id="categoryBody"></tbody>
+    </table>
+    <br>
+    <button class="btn btn-add" onclick="addCategoryRow()" 
+style="background-color: rgb(127, 184, 41); width: 100%;">
++ Add Category Row
+</button>
+
+    <div class="section-header">DEFECT LIST</div>
+    <table class="gen-table" id="defectTable">
+      <thead>
+        <tr>
+          <th style="width:40px;">S.NO</th>
+          <th>Defect Name</th>
+          <th style="width:70px;">Critical</th>
+          <th style="width:70px;">Major</th>
+          <th style="width:70px;">Minor</th>
+        </tr>
+      </thead>
+      <tbody id="defectBody"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" class="bold" style="text-align:right;">Total Found Defects :</td>
+          <td class="center" id="totalCritical">0</td>
+          <td class="center" id="totalMajor">0</td>
+          <td class="center" id="totalMinor">0</td>
+        </tr>
+        <tr>
+          <td colspan="2" class="bold" style="text-align:right;">Allowed Defects According to AQL :</td>
+          <td class="center"><input id="aqlAllowCritical"
+              style="width:50px;text-align:center;border:none;outline:none;"></td>
+          <td class="center"><input id="aqlAllowMajor" style="width:50px;text-align:center;border:none;outline:none;"
+              value="14"></td>
+          <td class="center"><input id="aqlAllowMinor" style="width:50px;text-align:center;border:none;outline:none;"
+              value="21"></td>
+        </tr>
+      </tfoot>
+    </table>
+    <br>
+    <button class="btn btn-add" onclick="addDefectRow()" style="background-color: rgb(127, 184, 41); width: 100%;">+ Add
+      Defect Row</button>
+
+    <div class="section-header">ARTICLE/COLOR WISE SELECTED CARTON DETAILS</div>
+    <table class="gen-table" id="cartonTable">
+      <thead>
+        <tr>
+          <th>Article/Color Name</th>
+          <th>Quantity Checked</th>
+          <th style="width:130px;">Size Ratio Checked</th>
+          <th style="width:100px;">Selected Carton</th>
+          <th style="width:80px;">Condition</th>
+        </tr>
+      </thead>
+      <tbody id="cartonBody"></tbody>
+    </table>
+    <br>
+    <button class="btn btn-add" onclick="addCartonRow()" style="background-color: rgb(127, 184, 41); width: 100%;">+ Add
+      Carton Row</button>
+
+    <div class="section-header">INSPECTOR REMARKS</div>
+    <table class="remarks-area">
+      <tr>
+        <td style="border:1px solid #000;padding:6px;">
+          <textarea id="inspectorRemarks" placeholder="Enter inspector remarks here..."></textarea>
+        </td>
+      </tr>
+    </table>
+
+    <div class="section-header images-section">PICTORIAL DETAILS:</div>
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <div class="btn-bar">
+      <button class="btn btn-add" onclick="addCard()">+ Add Image Card</button>
+      <button class="btn btn-add" onclick="newInspection()">🆕 New</button>
+      <button class="btn btn-save" onclick="saveInspection()">💾 Save to MongoDB</button>
+      <button class="btn btn-load" onclick="openModal()">📂 Load Saved</button>
+      <button class="btn btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+    </div>
+  </div>
+
+  <script>
+    // ─── State ────────────────────────────────────────────────────────────────────
+    let selectedResult = '';
+    let currentId = null;
+    let cardCounter = 0;
+    // imageCardData: { [cardId]: { filename, url, originalName, mimetype } }
+    const imageCardData = {};
+
+    const defaultCategories = [
+  { name: "", ok: false, notok: false, attachment: "" }
+];
+
+const defaultDefects = [
+  { name: "", critical: "", major: "", minor: "" }
+];
+
+const defaultCartons = [
+  { article: "", qty: "", ratio: "", selected: "", condition: "" }
+];
+
+const defaultCards = [];
+
+    // ─── Toast ────────────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast show ${type}`;
+      setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+
+    // ─── Result selection ─────────────────────────────────────────────────────────
+    function setResult(r) {
+      selectedResult = r;
+      ['Pass', 'Fail', 'Pending'].forEach(x => {
+        document.getElementById('result' + x).style.outline = 'none';
+      });
+      const map = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
+      document.getElementById(map[r]).style.outline = '4px solid #000';
+    }
+
+    // ─── Category ─────────────────────────────────────────────────────────────────
+   function buildCategories(data = defaultCategories) {
+  const tbody = document.getElementById('categoryBody');
+  tbody.innerHTML = '';
+
+  data.forEach(cat => addCategoryRow(cat));
+}
+
+    // ─── Defects ──────────────────────────────────────────────────────────────────
+    function buildDefects(data = defaultDefects) {
+      document.getElementById('defectBody').innerHTML = '';
+      data.forEach((d, i) => addDefectRow(d, i + 1));
+    }
+    function addDefectRow(d = {}, num = null) {
+      const tbody = document.getElementById('defectBody');
+      const rowNum = num || tbody.rows.length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="defect-num center">${rowNum}</td>
+    <td><input value="${escHtml(d.name || '')}" style="width:100%;border:none;outline:none;" oninput="updateTotals()"></td>
+    <td class="center"><input type="number" value="${d.critical || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
+    <td class="center"><input type="number" value="${d.major || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
+    <td class="center"><input type="number" value="${d.minor || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>`;
+      tbody.appendChild(tr);
+      updateTotals();
+    }
+    function updateTotals() {
+      let c = 0, m = 0, n = 0;
+      document.querySelectorAll('#defectBody tr').forEach(tr => {
+        const inp = tr.querySelectorAll('td input[type="number"]');
+        if (inp[0]) c += parseInt(inp[0].value || 0);
+        if (inp[1]) m += parseInt(inp[1].value || 0);
+        if (inp[2]) n += parseInt(inp[2].value || 0);
+      });
+      document.getElementById('totalCritical').textContent = c || '';
+      document.getElementById('totalMajor').textContent = m || '';
+      document.getElementById('totalMinor').textContent = n || '';
+    }
+
+    // ─── Cartons ──────────────────────────────────────────────────────────────────
+    function buildCartons(data = defaultCartons) {
+      document.getElementById('cartonBody').innerHTML = '';
+      data.forEach(c => addCartonRow(c));
+    }
+    function addCartonRow(d = {}) {
+      const tbody = document.getElementById('cartonBody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><input value="${escHtml(d.article || '')}" style="width:100%;border:none;outline:none;"></td>
+    <td><textarea style="width:100%;border:none;outline:none;resize:none;min-height:36px;">${escHtml(d.qty || '')}</textarea></td>
+    <td><input value="${escHtml(d.ratio || '')}" style="width:100%;border:none;outline:none;"></td>
+    <td class="center"><input type="number" value="${d.selected || ''}" style="width:60px;text-align:center;border:none;outline:none;"></td>
+    <td class="center"><input value="${escHtml(d.condition || '')}" style="width:100%;text-align:center;border:none;outline:none;"></td>`;
+      tbody.appendChild(tr);
+    }
+
+    // ─── Image Cards ──────────────────────────────────────────────────────────────
+    function buildCards(data = defaultCards) {
+      document.getElementById('cardsGrid').innerHTML = '';
+      cardCounter = 0;
+      Object.keys(imageCardData).forEach(k => delete imageCardData[k]);
+      if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+        // Loading from DB
+        data.forEach(card => addCard(card.caption || '', card.label || '', card));
+      } else {
+        // Default string captions
+        data.forEach(cap => addCard(cap));
+      }
+    }
+
+    function addCard(caption = '', label = '', savedCard = null) {
+      const id = 'card_' + (cardCounter++);
+      const grid = document.getElementById('cardsGrid');
+      const div = document.createElement('div');
+      div.className = 'img-card';
+      div.id = id;
+
+      const hasImage = savedCard && savedCard.url;
+      const imgHtml = hasImage
+        ? `<img src="${escHtml(savedCard.url)}" alt="img">`
+        : `<span>Click to add image</span>`;
+
+      div.innerHTML = `
+    <button class="btn-remove" onclick="removeCard('${id}')">×</button>
+    <div class="img-preview" id="prev_${id}" onclick="triggerFileInput('${id}')">${imgHtml}</div>
+    <div class="img-caption"><input value="${escHtml(caption)}" placeholder="Caption..."></div>
+    <div class="img-label-input"><input value="${escHtml(label)}" placeholder="Label / note below card..."></div>
+    <input type="file" accept="image/*" class="file-input-hidden" id="file_${id}" onchange="uploadImage('${id}', this)">`;
+
+      grid.appendChild(div);
+
+      if (savedCard && savedCard.filename) {
+        imageCardData[id] = {
+          filename: savedCard.filename,
+          url: savedCard.url,
+          originalName: savedCard.originalName || '',
+          mimetype: savedCard.mimetype || ''
+        };
+      }
+    }
+
+    function triggerFileInput(id) { document.getElementById('file_' + id).click(); }
+
+    async function uploadImage(id, input) {
+      if (!input.files || !input.files[0]) return;
+      const prev = document.getElementById('prev_' + id);
+      prev.innerHTML = '<span class="upload-spinner" style="display:block;">⏳ Uploading...</span>';
+
+      const formData = new FormData();
+      formData.append('image', input.files[0]);
+
+      try {
+        const res = await fetch('/api/inspections/upload/image', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        imageCardData[id] = { filename: data.filename, url: data.url, originalName: data.originalName, mimetype: data.mimetype };
+        prev.innerHTML = `<img src="${data.url}" alt="img">`;
+        showToast('Image uploaded ✓', 'success');
+      } catch (err) {
+        prev.innerHTML = '<span style="color:#f00;">Upload failed</span>';
+        showToast('Upload failed: ' + err.message, 'error');
+      }
+    }
+
+    function removeCard(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      delete imageCardData[id];
+    }
+
+    // ─── Collect form data ────────────────────────────────────────────────────────
+    function collectFormData() {
+      const v = id => (document.getElementById(id) || {}).value || '';
+      const chk = id => (document.getElementById(id) || {}).checked || false;
+
+      // Categories
+      const categories = [];
+      document.querySelectorAll('#categoryBody tr').forEach(tr => {
+        const inp = tr.querySelectorAll('input');
+        categories.push({ name: inp[0]?.value || '', ok: inp[1]?.checked || false, notok: inp[2]?.checked || false, attachment: inp[3]?.value || '' });
+      });
+
+      // Defects
+      const defects = [];
+      document.querySelectorAll('#defectBody tr').forEach((tr, i) => {
+        const inp = tr.querySelectorAll('input');
+        defects.push({ sno: i + 1, name: inp[0]?.value || '', critical: inp[1]?.value || '', major: inp[2]?.value || '', minor: inp[3]?.value || '' });
+      });
+
+      // Cartons
+      const cartons = [];
+      document.querySelectorAll('#cartonBody tr').forEach(tr => {
+        const inp = tr.querySelectorAll('input, textarea');
+        cartons.push({ article: inp[0]?.value || '', qty: inp[1]?.value || '', ratio: inp[2]?.value || '', selected: inp[3]?.value || '', condition: inp[4]?.value || '' });
+      });
+
+      // Image cards
+      const imageCards = [];
+      document.querySelectorAll('#cardsGrid .img-card').forEach(card => {
+        const id = card.id;
+        const caption = card.querySelector('.img-caption input')?.value || '';
+        const label = card.querySelector('.img-label-input input')?.value || '';
+        const imgData = imageCardData[id] || {};
+        imageCards.push({ caption, label, filename: imgData.filename || '', url: imgData.url || '', originalName: imgData.originalName || '', mimetype: imgData.mimetype || '' });
+      });
+
+      return {
+        buyer: v('buyer'), dpi: v('dpi'), fri: v('fri'),
+        poStyle: v('poStyle'), factory: v('factory'), inspDate: v('inspDate'),
+        unit: v('unit'), reInspDate: v('reInspDate'),
+        article: v('article'), colour: v('colour'),
+        orderQtyPcs: v('orderQtyPcs'), offeredQtyPcs: v('offeredQtyPcs'),
+        orderQtyCtns: v('orderQtyCtns'), offeredQtyCtns: v('offeredQtyCtns'),
+        unitsPerCarton: v('unitsPerCarton'),
+        aqlCritical: v('aqlCritical'), aqlMajor: v('aqlMajor'), aqlMinor: v('aqlMinor'),
+        reInspYes: chk('reInspYes'), reInspNo: chk('reInspNo'),
+        approvedYes: chk('approvedYes'), approvedNo: chk('approvedNo'),
+        inspectorName: v('inspectorName'), inspLocation: v('inspLocation'),
+        result: selectedResult, resultNote: v('resultNote'),
+        samplePcs: v('samplePcs'), selectedCartons: v('selectedCartons'),
+        aqlAllowCritical: v('aqlAllowCritical'), aqlAllowMajor: v('aqlAllowMajor'), aqlAllowMinor: v('aqlAllowMinor'),
+        inspectorRemarks: v('inspectorRemarks'),
+        categories, defects, cartons, imageCards
+      };
+    }
+
+    // ─── Save to MongoDB ──────────────────────────────────────────────────────────
+    async function saveInspection() {
+      const btn = document.querySelector('.btn-save');
+      btn.textContent = '⏳ Saving...';
+      btn.disabled = true;
+      try {
+        const body = collectFormData();
+        const method = currentId ? 'PUT' : 'POST';
+        const url = currentId ? `/api/inspections/${currentId}` : '/api/inspections';
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        currentId = data.data._id;
+        document.getElementById('currentId').textContent = currentId;
+        document.getElementById('savedBadge').style.display = 'inline-block';
+        showToast(method === 'POST' ? '✅ Saved to MongoDB!' : '✅ Updated in MongoDB!', 'success');
+      } catch (err) {
+        showToast('❌ Save failed: ' + err.message, 'error');
+      }
+      btn.textContent = '💾 Save to MongoDB';
+      btn.disabled = false;
+    }
+
+    // ─── Download Excel ───────────────────────────────────────────────────────────
+    async function downloadExcel() {
+      if (!currentId) {
+        showToast('⚠️ Please save the inspection first!', 'error');
+        return;
+      }
+      const btn = document.querySelector('.btn-download');
+      btn.textContent = '⏳ Generating...';
+      btn.disabled = true;
+      try {
+        // Save latest data first
+        const saveRes = await fetch(`/api/inspections/${currentId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(collectFormData())
+        });
+        const saveData = await saveRes.json();
+        if (!saveData.success) throw new Error(saveData.message);
+        // Download
+        window.location.href = `/api/inspections/${currentId}/excel`;
+        showToast('✅ Excel downloading...', 'success');
+      } catch (err) {
+        showToast('❌ Error: ' + err.message, 'error');
+      }
+      btn.textContent = '⬇ Download Excel';
+      btn.disabled = false;
+    }
+
+    // ─── Load Saved Inspections ───────────────────────────────────────────────────
+    async function openModal() {
+      document.getElementById('listModal').classList.add('show');
+      document.getElementById('inspectionList').innerHTML = '<p style="text-align:center;padding:20px;">Loading...</p>';
+      try {
+        const res = await fetch('/api/inspections');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        renderList(data.data);
+      } catch (err) {
+        document.getElementById('inspectionList').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+    function closeModal() { document.getElementById('listModal').classList.remove('show'); }
+
+    function renderList(items) {
+      const div = document.getElementById('inspectionList');
+      if (!items.length) { div.innerHTML = '<p style="text-align:center;padding:20px;color:#888;">No inspections saved yet.</p>'; return; }
+      div.innerHTML = items.map(item => `
+    <div class="insp-item">
+      <div class="insp-item-info">
+        <strong>${escHtml(item.buyer || '(no buyer)')} — ${escHtml(item.poStyle || '(no PO)')}</strong>
+        <span>Factory: ${escHtml(item.factory || '—')} | Date: ${item.inspDate || '—'}</span>
+        <span>Created: ${new Date(item.createdAt).toLocaleString()}</span>
+      </div>
+      <div style="margin: 0 12px;">
+        <span class="result-badge ${item.result === 'PASS' ? 'badge-pass' : item.result === 'FAIL' ? 'badge-fail' : 'badge-pending'}">${item.result || '—'}</span>
+      </div>
+      <div class="insp-item-btns">
+        <button class="btn-sm btn-sm-load" onclick="loadInspection('${item._id}')">Load</button>
+        <button class="btn-sm btn-sm-del" onclick="deleteInspection('${item._id}', this)">Delete</button>
+      </div>
+    </div>`).join('');
+    }
+
+    async function loadInspection(id) {
+      try {
+        const res = await fetch(`/api/inspections/${id}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        populateForm(data.data);
+        closeModal();
+        showToast('✅ Inspection loaded!', 'success');
+      } catch (err) {
+        showToast('❌ Load failed: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteInspection(id, btn) {
+      if (!confirm('Delete this inspection?')) return;
+      btn.textContent = '...';
+      try {
+        const res = await fetch(`/api/inspections/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        showToast('Deleted!', 'success');
+        openModal();
+      } catch (err) {
+        showToast('Delete failed: ' + err.message, 'error');
+      }
+    }
+
+    function addCategoryRow(d = {}) {
+  const tbody = document.getElementById('categoryBody');
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input placeholder="Enter category..." value="${escHtml(d.name || '')}" style="width:100%;border:none;outline:none;"></td>
+    
+    <td class="center">
+      <input type="checkbox" ${d.ok ? 'checked' : ''}>
+    </td>
+    
+    <td class="center">
+      <input type="checkbox" ${d.notok ? 'checked' : ''}>
+    </td>
+    
+    <td>
+      <input placeholder="Attachment / note..." value="${escHtml(d.attachment || '')}" style="width:100%;border:none;outline:none;">
+    </td>
+  `;
+
+  tbody.appendChild(tr);
+}
+
+    // ─── Populate form from DB data ───────────────────────────────────────────────
+    function populateForm(d) {
+      const fields = ['buyer', 'dpi', 'fri', 'poStyle', 'factory', 'inspDate', 'unit', 'reInspDate',
+        'article', 'colour', 'orderQtyPcs', 'offeredQtyPcs', 'orderQtyCtns', 'offeredQtyCtns',
+        'unitsPerCarton', 'aqlCritical', 'aqlMajor', 'aqlMinor', 'inspectorName', 'inspLocation',
+        'resultNote', 'samplePcs', 'selectedCartons', 'aqlAllowCritical', 'aqlAllowMajor',
+        'aqlAllowMinor', 'inspectorRemarks'];
+      fields.forEach(f => { const el = document.getElementById(f); if (el && d[f] !== undefined) el.value = d[f]; });
+
+      const chks = ['reInspYes', 'reInspNo', 'approvedYes', 'approvedNo'];
+      chks.forEach(f => { const el = document.getElementById(f); if (el) el.checked = !!d[f]; });
+
+      currentId = d._id;
+      document.getElementById('currentId').textContent = currentId;
+      document.getElementById('savedBadge').style.display = 'inline-block';
+
+      setResult(d.result || '');
+      buildCategories(d.categories && d.categories.length ? d.categories : defaultCategories);
+      buildDefects(d.defects && d.defects.length ? d.defects : defaultDefects);
+      buildCartons(d.cartons && d.cartons.length ? d.cartons : defaultCartons);
+      buildCards(d.imageCards && d.imageCards.length ? d.imageCards : defaultCards);
+    }
+
+    // ─── New Inspection ───────────────────────────────────────────────────────────
+   function newInspection() {
+  if (!confirm('Start a new inspection? Unsaved changes will be lost.')) return;
+
+  currentId = null;
+  selectedResult = '';
+
+  document.getElementById('currentId').textContent = '—';
+  document.getElementById('savedBadge').style.display = 'none';
+
+  ['Pass', 'Fail', 'Pending'].forEach(x => {
+    document.getElementById('result' + x).style.outline = 'none';
+  });
+
+  const fields = [
+    'buyer', 'dpi', 'fri', 'poStyle', 'factory', 'inspDate', 'unit', 'reInspDate',
+    'article', 'colour', 'orderQtyPcs', 'offeredQtyPcs',
+    'orderQtyCtns', 'offeredQtyCtns', 'unitsPerCarton',
+    'aqlCritical', 'aqlMajor', 'aqlMinor',
+    'inspectorName', 'inspLocation',
+    'resultNote', 'inspectorRemarks',
+    'samplePcs', 'selectedCartons',
+    'aqlAllowCritical', 'aqlAllowMajor', 'aqlAllowMinor'
+  ];
+
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.value = '';
+  });
+
+  ['reInspYes', 'reInspNo', 'approvedYes', 'approvedNo'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.checked = false;
+  });
+
+  buildCategories(defaultCategories);
+  buildDefects(defaultDefects);
+  buildCartons(defaultCartons);
+  buildCards(defaultCards);
+}
+
+    // ─── Utility ──────────────────────────────────────────────────────────────────
+    function escHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────────
+    buildCategories();
+    buildDefects();
+    buildCartons();
+    buildCards(defaultCards);
+  </script>
+</body>
+
+</html>
