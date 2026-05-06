@@ -714,8 +714,12 @@ style="background-color: rgb(127, 184, 41); width: 100%;">
       <button class="btn btn-save" onclick="saveInspection()">💾 Save to MongoDB</button>
       <button class="btn btn-load" onclick="openModal()">📂 Load Saved</button>
       <button class="btn btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
+      <button class="btn btn-download" style="background:#ff4444;color:#fff;" onclick="downloadPDF()">📄 Download PDF</button>
     </div>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 
   <script>
     // ─── State ────────────────────────────────────────────────────────────────────
@@ -751,10 +755,16 @@ const defaultCards = [];
     function setResult(r) {
       selectedResult = r;
       ['Pass', 'Fail', 'Pending'].forEach(x => {
-        document.getElementById('result' + x).style.outline = 'none';
+        const el = document.getElementById('result' + x);
+        if (el) el.style.outline = 'none';
       });
       const map = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
-      document.getElementById(map[r]).style.outline = '4px solid #000';
+      if (r && map[r]) {
+        const el = document.getElementById(map[r]);
+        if (el) {
+          el.style.outline = '4px solid #000';
+        }
+      }
     }
 
     // ─── Category ─────────────────────────────────────────────────────────────────
@@ -958,7 +968,8 @@ const defaultCards = [];
         const data = await res.json();
         if (!data.success) throw new Error(data.message);
         currentId = data.data._id;
-        document.getElementById('currentId').textContent = currentId;
+        const cidEl = document.getElementById('currentId');
+        if (cidEl) cidEl.textContent = currentId;
         document.getElementById('savedBadge').style.display = 'inline-block';
         showToast(method === 'POST' ? '✅ Saved to MongoDB!' : '✅ Updated in MongoDB!', 'success');
       } catch (err) {
@@ -1094,7 +1105,8 @@ const defaultCards = [];
       chks.forEach(f => { const el = document.getElementById(f); if (el) el.checked = !!d[f]; });
 
       currentId = d._id;
-      document.getElementById('currentId').textContent = currentId;
+      const cidEl = document.getElementById('currentId');
+      if (cidEl) cidEl.textContent = currentId;
       document.getElementById('savedBadge').style.display = 'inline-block';
 
       setResult(d.result || '');
@@ -1111,11 +1123,13 @@ const defaultCards = [];
   currentId = null;
   selectedResult = '';
 
-  document.getElementById('currentId').textContent = '—';
+  const cidEl = document.getElementById('currentId');
+  if (cidEl) cidEl.textContent = '—';
   document.getElementById('savedBadge').style.display = 'none';
 
   ['Pass', 'Fail', 'Pending'].forEach(x => {
-    document.getElementById('result' + x).style.outline = 'none';
+    const el = document.getElementById('result' + x);
+    if (el) el.style.outline = 'none';
   });
 
   const fields = [
@@ -1148,6 +1162,100 @@ const defaultCards = [];
     // ─── Utility ──────────────────────────────────────────────────────────────────
     function escHtml(str) {
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ─── Download PDF ────────────────────────────────────────────────────────────
+    function downloadPDF() {
+      const element = document.getElementById('mainPage');
+      const toast = document.getElementById('toast');
+      
+      if (toast) toast.style.display = 'none';
+      
+      // 1. Hide all buttons from the PDF so it looks like a clean report
+      const allButtons = document.querySelectorAll('button');
+      const prevButtonDisplays = [];
+      allButtons.forEach((btn, i) => {
+        prevButtonDisplays[i] = btn.style.display;
+        btn.style.display = 'none';
+      });
+
+      // 2. Adjust textareas to show all text (expand to scrollHeight)
+      const textareas = document.querySelectorAll('textarea');
+      const prevTextareaHeights = [];
+      textareas.forEach((ta, i) => {
+        prevTextareaHeights[i] = ta.style.height;
+        ta.style.height = ta.scrollHeight + 'px';
+        ta.textContent = ta.value;
+      });
+
+      // 3. Ensure input values are properly captured
+      document.querySelectorAll('input').forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            if(input.checked) input.setAttribute('checked', 'checked');
+            else input.removeAttribute('checked');
+        } else {
+            input.setAttribute('value', input.value || '');
+        }
+      });
+
+      // 4. Fix Grid layout because html2pdf sometimes cuts off CSS Grid and Flexbox content
+      const grid = document.getElementById('cardsGrid');
+      const prevGridDisplay = grid.style.display;
+      grid.style.display = 'block';
+
+      const cards = document.querySelectorAll('.img-card');
+      const prevCardStyles = [];
+      cards.forEach((card, i) => {
+        prevCardStyles[i] = card.style.cssText;
+        card.style.display = 'inline-block';
+        card.style.width = '48%';
+        card.style.margin = '0 1% 10px 1%';
+        card.style.verticalAlign = 'top';
+        card.style.pageBreakInside = 'avoid';
+      });
+
+      const opt = {
+        margin:       [10, 10, 10, 10],
+        filename:     `Inspection_${document.getElementById('buyer').value || 'Report'}_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: 'css', avoid: ['tr', '.img-card', '.section-header'] }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        // Restore buttons
+        allButtons.forEach((btn, i) => {
+          btn.style.display = prevButtonDisplays[i];
+        });
+        // Restore textarea heights
+        textareas.forEach((ta, i) => {
+          ta.style.height = prevTextareaHeights[i];
+        });
+        // Restore grid
+        grid.style.display = prevGridDisplay;
+        cards.forEach((card, i) => {
+          card.style.cssText = prevCardStyles[i];
+        });
+        
+        if (toast) toast.style.display = '';
+        showToast('✅ PDF Downloaded!', 'success');
+      }).catch(err => {
+        // Restore all on error
+        allButtons.forEach((btn, i) => {
+          btn.style.display = prevButtonDisplays[i];
+        });
+        textareas.forEach((ta, i) => {
+          ta.style.height = prevTextareaHeights[i];
+        });
+        grid.style.display = prevGridDisplay;
+        cards.forEach((card, i) => {
+          card.style.cssText = prevCardStyles[i];
+        });
+        
+        if (toast) toast.style.display = '';
+        showToast('❌ PDF Download failed: ' + err.message, 'error');
+      });
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────────────
