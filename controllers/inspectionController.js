@@ -295,7 +295,7 @@ exports.downloadExcel = async (req, res) => {
       row++;
 
       // Image row
-      ws.getRow(row).height = 120;
+      ws.getRow(row).height = 165;
 
       // Left image
       if (cards[i].filename) {
