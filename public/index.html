@@ -78,6 +78,9 @@
     .radio-group { display: flex; align-items: center; gap: 20px; }
     .radio-group label { display: flex; align-items: center; gap: 5px; margin: 0; margin-left: 8px; }
     .radio-group input { margin: 0; vertical-align: middle; }
+    .gen-table tr, .info-table tr, .sample-box tr, .remarks-area tr {
+    page-break-inside: avoid;
+    break-inside: avoid;}
   </style>
 </head>
 <body>
@@ -193,7 +196,7 @@
     <table class="sample-box">
       <tr>
         <td style="width:20%;">SAMPLE SIZE</td>
-        <td style="width:40%;">NO. OF PIECES: <input id="samplePcs" placeholder="e.g. 315"> pcs</td>
+        <td style="width:40%;">NO. OF PIECES: <input id="samplePcs" placeholder="e.g. 315"></td>
         <td style="width:40%;">SELECTED CARTONS: <input id="selectedCartons" placeholder="e.g. 56"></td>
       </tr>
     </table>
