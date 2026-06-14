@@ -685,301 +685,302 @@
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-// PASTE THIS ENTIRE BLOCK to replace the old downloadPDF() function in your HTML
-
 function downloadPDF() {
   const toast = document.getElementById('toast');
   if (toast) toast.style.display = 'none';
 
-  // ── 1. Hide interactive / UI-only elements ──────────────────────────────
-  const hideEls = [];
+  const buyerVal = document.getElementById('buyer')?.value || '';
+  const filename = `Inspection_${buyerVal || 'Report'}_${new Date().toISOString().slice(0,10)}.pdf`;
 
-  // Hide buttons
-  document.querySelectorAll('button').forEach(btn => {
-    hideEls.push({ el: btn, prop: 'display', prev: btn.style.display });
-    btn.style.display = 'none';
+  // ── Shared jsPDF config ──────────────────────────────────────────────────
+  const PDF_W = 210, PDF_H = 297; // A4 mm
+  const MARGIN_L = 10, MARGIN_R = 10, MARGIN_T = 20, MARGIN_B = 18;
+  const CONTENT_W = PDF_W - MARGIN_L - MARGIN_R;
+
+  // ── Step A: Prepare the main page (hide UI, replace inputs) ─────────────
+  const restoreFns = [];
+
+  // Hide buttons & saved badge
+  const uiEls = [...document.querySelectorAll('button'), document.getElementById('savedBadge')].filter(Boolean);
+  uiEls.forEach(el => {
+    const prev = el.style.display;
+    el.style.display = 'none';
+    restoreFns.push(() => el.style.display = prev);
   });
 
-  // Hide the "Saved" green badge
-  const savedBadge = document.getElementById('savedBadge');
-  if (savedBadge) {
-    hideEls.push({ el: savedBadge, prop: 'display', prev: savedBadge.style.display });
-    savedBadge.style.display = 'none';
-  }
-
-  // ── 2. Replace inputs with clean <span> so placeholder text never shows ──
-  const inputReplacements = [];
-  document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea').forEach(el => {
-    const span = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
-    span.textContent = el.value || '';  // empty stays empty — no placeholder
-    span.style.cssText = window.getComputedStyle(el).cssText;
-    span.style.display = 'inline-block';
-    span.style.width = '100%';
-    span.style.whiteSpace = 'pre-wrap';
-    span.style.wordBreak = 'break-word';
-    span.style.minHeight = el.tagName === 'TEXTAREA' ? Math.max(el.scrollHeight, 40) + 'px' : '';
-    span.style.border = 'none';
-    span.style.outline = 'none';
-    span.style.background = 'transparent';
-    span.style.fontFamily = 'Arial, sans-serif';
-    span.style.fontSize = '12px';
+  // Replace text inputs/textareas with spans (no placeholder, wrap text)
+  document.querySelectorAll(
+    'input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea'
+  ).forEach(el => {
+    const isTA = el.tagName === 'TEXTAREA';
+    const span = document.createElement(isTA ? 'div' : 'span');
+    span.textContent = el.value || '';
+    span.style.cssText = `
+      display:${isTA ? 'block' : 'inline-block'};
+      width:100%; white-space:pre-wrap; word-break:break-word;
+      min-height:${isTA ? Math.max(el.scrollHeight, 36) : 0}px;
+      border:none; outline:none; background:transparent;
+      font-family:Arial,sans-serif; font-size:12px; line-height:1.4;
+      padding:0; margin:0; box-sizing:border-box;
+    `;
     el.parentNode.insertBefore(span, el);
     el.style.display = 'none';
-    inputReplacements.push({ span, input: el });
+    restoreFns.push(() => { el.style.display = ''; span.remove(); });
   });
 
-  // ── 3. Fix checkbox / radio display ─────────────────────────────────────
-  const checkboxReplacements = [];
+  // Replace checkboxes with symbols
   document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
     const span = document.createElement('span');
     span.textContent = el.checked ? '☑' : '☐';
     span.style.fontSize = '13px';
     el.parentNode.insertBefore(span, el);
     el.style.display = 'none';
-    checkboxReplacements.push({ span, input: el });
+    restoreFns.push(() => { el.style.display = ''; span.remove(); });
   });
 
-  // ── 4. Highlight the selected PASS/FAIL/PENDING result cell ─────────────
-  //    Add a thick black border outline to whichever is selected
+  // Highlight selected result, dim others
   const resultMap = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
-  const prevOutlines = {};
   Object.entries(resultMap).forEach(([key, id]) => {
     const el = document.getElementById(id);
-    if (el) {
-      prevOutlines[id] = el.style.outline;
-      if (key === selectedResult) {
-        el.style.outline = '4px solid #000';
-        el.style.fontWeight = 'bold';
-      } else {
-        el.style.outline = 'none';
-        el.style.opacity = '0.45';  // dim unselected
-      }
+    if (!el) return;
+    const prevOutline = el.style.outline, prevOpacity = el.style.opacity;
+    if (key === selectedResult) {
+      el.style.outline = '4px solid #000';
+      el.style.opacity = '1';
+    } else {
+      el.style.outline = 'none';
+      el.style.opacity = '0.4';
     }
+    restoreFns.push(() => { el.style.outline = prevOutline; el.style.opacity = prevOpacity; });
   });
 
-  // ── 5. Image cards: force 2-column grid, 3 rows per page (=6 per page) ──
-  const grid = document.getElementById('cardsGrid');
-  const prevGridStyle = grid.style.cssText;
+  // ── Step B: Hide the image section from main page render ─────────────────
+  // We will render images separately page by page
+  const pictorialHeader = document.querySelector('.images-section');
+  const cardsGrid       = document.getElementById('cardsGrid');
+  const btnBar          = document.querySelector('.btn-bar');
 
-  // We'll use CSS columns approach: wrap each pair of cards in a page-chunk div
-  const cards = Array.from(document.querySelectorAll('.img-card'));
-  const prevCardStyles = cards.map(c => c.style.cssText);
+  const prevPH  = pictorialHeader ? pictorialHeader.style.display : '';
+  const prevCG  = cardsGrid       ? cardsGrid.style.display       : '';
+  const prevBB  = btnBar          ? btnBar.style.display          : '';
 
-  // Remove cards from grid temporarily
-  cards.forEach(card => grid.removeChild(card));
+  if (pictorialHeader) pictorialHeader.style.display = 'none';
+  if (cardsGrid)       cardsGrid.style.display       = 'none';
+  if (btnBar)          btnBar.style.display          = 'none';
 
-  // Build page groups of 6 cards each (3 rows × 2 columns)
-  const pageGroups = [];
-  for (let i = 0; i < cards.length; i += 6) {
-    pageGroups.push(cards.slice(i, i + 6));
+  restoreFns.push(() => {
+    if (pictorialHeader) pictorialHeader.style.display = prevPH;
+    if (cardsGrid)       cardsGrid.style.display       = prevCG;
+    if (btnBar)          btnBar.style.display          = prevBB;
+  });
+
+  // ── Collect image card data BEFORE any DOM changes ───────────────────────
+  const cardEls = Array.from(document.querySelectorAll('#cardsGrid .img-card'));
+  const cardSnapshots = cardEls.map(card => ({
+    imgSrc    : card.querySelector('.img-preview img')?.src || '',
+    caption   : card.querySelector('.img-caption input')?.value || '',
+    label     : card.querySelector('.img-label-input input')?.value || '',
+  }));
+
+  // ── Helper: add header & footer to every page of a jsPDF instance ────────
+  function stampHeaderFooter(pdf) {
+    const total = pdf.internal.getNumberOfPages();
+    for (let pg = 1; pg <= total; pg++) {
+      pdf.setPage(pg);
+      // Header box
+      pdf.setFillColor(255,255,255);
+      pdf.setDrawColor(0,0,0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(MARGIN_L, 4, CONTENT_W, 11, 'FD');
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(0,0,0);
+      pdf.text('TEXTILE INSPECTION HUB', PDF_W/2, 11.5, { align:'center' });
+      // Footer line + page number
+      pdf.setDrawColor(180,180,180);
+      pdf.setLineWidth(0.3);
+      pdf.line(MARGIN_L, PDF_H - MARGIN_B + 3, PDF_W - MARGIN_R, PDF_H - MARGIN_B + 3);
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(80,80,80);
+      pdf.text(`Page ${pg}`, PDF_W/2, PDF_H - MARGIN_B + 8, { align:'center' });
+    }
   }
 
-  grid.style.display = 'block';
+  // ── Step C: Render main report (no images) ────────────────────────────────
+  const mainEl = document.getElementById('mainPage');
+  const mainW  = mainEl.scrollWidth;
 
-  const groupDivs = [];
-  pageGroups.forEach((group, gi) => {
-    const groupDiv = document.createElement('div');
-    groupDiv.style.cssText = `
-      display: block;
-      width: 100%;
-      page-break-before: ${gi === 0 ? 'auto' : 'always'};
-      break-before: ${gi === 0 ? 'auto' : 'page'};
-    `;
-    // Inner table-like layout: 2 per row
-    const innerDiv = document.createElement('div');
-    innerDiv.style.cssText = 'display:block;width:100%;';
+  const h2pMain = html2pdf()
+    .set({
+      margin      : [MARGIN_T, MARGIN_L, MARGIN_B, MARGIN_R],
+      image       : { type:'jpeg', quality:0.97 },
+      html2canvas : { scale:2, useCORS:true, scrollY:0, windowWidth:mainW, logging:false },
+      jsPDF       : { unit:'mm', format:'a4', orientation:'portrait' },
+      pagebreak   : { mode:['css','legacy'], avoid:['tr','thead','.section-header'] }
+    })
+    .from(mainEl);
 
-    for (let row = 0; row < group.length; row += 2) {
-      const rowDiv = document.createElement('div');
-      rowDiv.style.cssText = 'display:block;width:100%;margin-bottom:8px;page-break-inside:avoid;break-inside:avoid;';
+  h2pMain.toPdf().get('pdf').then(async (mainPdf) => {
 
-      const left = group[row];
-      if (left) {
-        left.style.cssText = `
-          display:inline-block;width:48%;vertical-align:top;
-          margin-right:2%;page-break-inside:avoid;break-inside:avoid;
-          border:2px solid #000;box-sizing:border-box;
+    // ── Step D: For each group of 6 cards, render an image page ─────────────
+    if (cardSnapshots.length > 0) {
+
+      // A4 usable area in px at 96dpi for canvas sizing
+      // Each image page: header(MARGIN_T mm) + 3 rows of cards + footer(MARGIN_B mm)
+      // Card row height = (A4_content_height / 3) in mm
+      const pageContentH = PDF_H - MARGIN_T - MARGIN_B;  // mm
+      const rowH_mm      = (pageContentH - 8) / 3;       // 3 rows, 8mm gap total
+      const colW_mm      = (CONTENT_W - 4) / 2;          // 2 cols, 4mm gap
+
+      // We build each group of 6 as an off-screen HTML table, canvas it, add to pdf
+      for (let gi = 0; gi < cardSnapshots.length; gi += 6) {
+        const group = cardSnapshots.slice(gi, gi + 6);
+
+        // Build off-screen div mimicking the page content area
+        const wrapper = document.createElement('div');
+        // Width = A4 content width in pixels (approx 794px for A4 at 96dpi minus margins)
+        const pxW = 760; // content width in px
+        const rowH_px = Math.floor((pxW / CONTENT_W) * rowH_mm);
+        const imgH_px = rowH_px - 30; // leave 30px for caption+label
+
+        wrapper.style.cssText = `
+          position:fixed; left:-9999px; top:0;
+          width:${pxW}px;
+          background:#fff;
+          font-family:Arial,sans-serif;
+          font-size:11px;
+          padding:0; margin:0;
+          box-sizing:border-box;
         `;
-        rowDiv.appendChild(left);
-      }
-      const right = group[row + 1];
-      if (right) {
-        right.style.cssText = `
-          display:inline-block;width:48%;vertical-align:top;
-          margin-left:2%;page-break-inside:avoid;break-inside:avoid;
-          border:2px solid #000;box-sizing:border-box;
+
+        // Build 3 rows × 2 cols table
+        const table = document.createElement('table');
+        table.style.cssText = `
+          width:100%; border-collapse:collapse;
+          table-layout:fixed;
         `;
-        rowDiv.appendChild(right);
+
+        for (let row = 0; row < 3; row++) {
+          const tr = document.createElement('tr');
+          for (let col = 0; col < 2; col++) {
+            const idx = row * 2 + col;
+            const td = document.createElement('td');
+            td.style.cssText = `
+              width:50%; padding:3px;
+              vertical-align:top; box-sizing:border-box;
+            `;
+            if (idx < group.length) {
+              const card = group[idx];
+              const cardDiv = document.createElement('div');
+              cardDiv.style.cssText = `
+                border:2px solid #000; width:100%;
+                box-sizing:border-box; background:#fff;
+              `;
+              // Image area
+              const imgDiv = document.createElement('div');
+              imgDiv.style.cssText = `
+                width:100%; height:${imgH_px}px;
+                background:#e8e8e8; overflow:hidden;
+                display:flex; align-items:center; justify-content:center;
+                border-bottom:1px solid #ccc;
+              `;
+              if (card.imgSrc) {
+                const img = document.createElement('img');
+                img.src = card.imgSrc;
+                img.crossOrigin = 'anonymous';
+                img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+                imgDiv.appendChild(img);
+              }
+              cardDiv.appendChild(imgDiv);
+
+              // Caption
+              if (card.caption) {
+                const capDiv = document.createElement('div');
+                capDiv.textContent = card.caption;
+                capDiv.style.cssText = `
+                  padding:3px 5px; font-weight:bold; text-align:center;
+                  font-size:10px; border-bottom:1px solid #ccc;
+                  word-break:break-word;
+                `;
+                cardDiv.appendChild(capDiv);
+              }
+              // Label
+              if (card.label) {
+                const lblDiv = document.createElement('div');
+                lblDiv.textContent = card.label;
+                lblDiv.style.cssText = `
+                  padding:2px 5px; font-size:10px; text-align:center;
+                  word-break:break-word;
+                `;
+                cardDiv.appendChild(lblDiv);
+              }
+              td.appendChild(cardDiv);
+            }
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+
+        wrapper.appendChild(table);
+        document.body.appendChild(wrapper);
+
+        // Wait for images to load
+        await new Promise(resolve => {
+          const imgs = wrapper.querySelectorAll('img');
+          if (!imgs.length) return resolve();
+          let loaded = 0;
+          imgs.forEach(img => {
+            if (img.complete) { loaded++; if (loaded === imgs.length) resolve(); }
+            else {
+              img.onload  = () => { loaded++; if (loaded === imgs.length) resolve(); };
+              img.onerror = () => { loaded++; if (loaded === imgs.length) resolve(); };
+            }
+          });
+        });
+
+        // Canvas render
+        const canvas = await html2canvas(wrapper, {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        document.body.removeChild(wrapper);
+
+        // Add new page to mainPdf and draw canvas
+        mainPdf.addPage();
+        const imgData = canvas.toDataURL('image/jpeg', 0.97);
+        // Draw inside content area
+        mainPdf.addImage(
+          imgData, 'JPEG',
+          MARGIN_L,
+          MARGIN_T,
+          CONTENT_W,
+          pageContentH
+        );
       }
-      innerDiv.appendChild(rowDiv);
     }
 
-    groupDiv.appendChild(innerDiv);
-    grid.appendChild(groupDiv);
-    groupDivs.push(groupDiv);
-  });
+    // ── Step E: Stamp header + footer on ALL pages ────────────────────────
+    stampHeaderFooter(mainPdf);
 
-  // ── 6. Add repeating header + page number via CSS @page + print styles ──
-  const styleTag = document.createElement('style');
-  styleTag.id = 'pdf-print-style';
-  styleTag.textContent = `
-    @page {
-      margin: 15mm 10mm 20mm 10mm;
-      size: A4 portrait;
-    }
+    // ── Step F: Save ──────────────────────────────────────────────────────
+    mainPdf.save(filename);
 
-    /* Suppress browser default header/footer */
-    @media print {
-      @page { margin: 15mm 10mm 20mm 10mm; }
-    }
-
-    /* Running header that repeats on every page */
-    .pdf-page-header {
-      display: block;
-      position: running(pageHeader);
-      background: #fff;
-      border: 2px solid #000;
-      text-align: center;
-      font-family: Arial, sans-serif;
-      font-size: 18px;
-      font-weight: bold;
-      padding: 8px;
-      letter-spacing: 1px;
-    }
-
-    /* Page number footer */
-    .pdf-page-footer {
-      position: running(pageFooter);
-      text-align: center;
-      font-family: Arial, sans-serif;
-      font-size: 10px;
-      color: #444;
-    }
-
-    /* html2pdf doesn't support CSS running elements,
-       so we handle header/footer via beforeEach page callback instead */
-  `;
-  document.head.appendChild(styleTag);
-
-  // ── 7. html2pdf options ──────────────────────────────────────────────────
-  const element = document.getElementById('mainPage');
-
-  // Clone element to add header/footer on each page
-  const buyerVal = document.getElementById('buyer')?.querySelector('span')?.textContent
-                || document.getElementById('buyer')?.value || '';
-
-  const opt = {
-    margin: [18, 10, 18, 10],    // top margin leaves room for header
-    filename: `Inspection_${buyerVal || 'Report'}_${new Date().toISOString().slice(0, 10)}.pdf`,
-    image: { type: 'jpeg', quality: 0.97 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      scrollY: 0,
-      windowWidth: document.getElementById('mainPage').scrollWidth,
-      logging: false
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: 'a4',
-      orientation: 'portrait'
-    },
-    pagebreak: {
-      mode: ['css', 'legacy'],
-      avoid: ['tr', '.img-card', '.section-header', 'thead']
-    }
-  };
-
-  // Use html2pdf worker so we can add header/footer with jsPDF after render
-  const worker = html2pdf().set(opt).from(element);
-
-  worker.toPdf().get('pdf').then(function (pdf) {
-    const totalPages = pdf.internal.getNumberOfPages();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    for (let pg = 1; pg <= totalPages; pg++) {
-      pdf.setPage(pg);
-
-      // ── Header bar on every page ──
-      pdf.setFillColor(255, 255, 255);
-      pdf.setDrawColor(0, 0, 0);
-      pdf.setLineWidth(0.5);
-      pdf.rect(10, 5, pageWidth - 20, 10, 'FD');       // white box
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(13);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text('TEXTILE INSPECTION HUB', pageWidth / 2, 12, { align: 'center' });
-
-      // ── Footer: Page X of Y ──
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
-      pdf.setTextColor(80, 80, 80);
-      pdf.text(
-        `Page ${pg} of ${totalPages}`,
-        pageWidth / 2,
-        pageHeight - 5,
-        { align: 'center' }
-      );
-
-      // ── Thin line above footer ──
-      pdf.setDrawColor(180, 180, 180);
-      pdf.setLineWidth(0.3);
-      pdf.line(10, pageHeight - 8, pageWidth - 10, pageHeight - 8);
-    }
-
-    return pdf;
-  }).save().then(() => {
-    restoreAll();
+    // ── Restore DOM ───────────────────────────────────────────────────────
+    restoreFns.forEach(fn => fn());
     if (toast) toast.style.display = '';
     showToast('✅ PDF Downloaded!', 'success');
+
   }).catch(err => {
-    restoreAll();
+    restoreFns.forEach(fn => fn());
     if (toast) toast.style.display = '';
     showToast('❌ PDF failed: ' + err.message, 'error');
+    console.error(err);
   });
-
-  // ── Restore everything ───────────────────────────────────────────────────
-  function restoreAll() {
-    // Restore hidden elements
-    hideEls.forEach(({ el, prop, prev }) => el.style[prop] = prev);
-
-    // Restore input/textarea
-    inputReplacements.forEach(({ span, input }) => {
-      input.style.display = '';
-      if (span.parentNode) span.parentNode.removeChild(span);
-    });
-
-    // Restore checkboxes
-    checkboxReplacements.forEach(({ span, input }) => {
-      input.style.display = '';
-      if (span.parentNode) span.parentNode.removeChild(span);
-    });
-
-    // Restore result highlights
-    Object.entries(resultMap).forEach(([key, id]) => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.outline = prevOutlines[id] || '';
-        el.style.opacity = '';
-        if (key === selectedResult) el.style.outline = '4px solid #000';
-      }
-    });
-
-    // Restore image cards
-    // Remove group divs from grid
-    groupDivs.forEach(gd => { if (gd.parentNode) gd.parentNode.removeChild(gd); });
-    // Restore cards to grid
-    cards.forEach((card, i) => {
-      card.style.cssText = prevCardStyles[i];
-      grid.appendChild(card);
-    });
-    grid.style.cssText = prevGridStyle;
-
-    // Remove print style
-    const ps = document.getElementById('pdf-print-style');
-    if (ps) ps.remove();
-  }
 }
 
 
