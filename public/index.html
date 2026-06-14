@@ -1,512 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Textile Inspection Hub</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      background: #f0f0f0;
-    }
-
-    .page {
-      width: 100%;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border: 2px solid #000;
-    }
-
-    .main-title {
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-      background: #fff;
-      border: 2px solid #000;
-      padding: 10px;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-
-    .info-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 8px;
-    }
-
-    .info-table td,
-    .info-table th {
-      border: 1px solid #000;
-      padding: 4px 6px;
-      vertical-align: middle;
-    }
-
-    .info-table .label {
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .info-table input,
-    .info-table select {
-      border: none;
-      outline: none;
-      width: 100%;
-      background: transparent;
-      font-size: 12px;
-    }
-
-    .section-header {
-      background: #ffd700;
-      font-weight: bold;
-      text-align: center;
-      border: 1px solid #000;
-      padding: 5px;
-      margin: 8px 0 0;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-    }
-
-    .gen-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .gen-table td,
-    .gen-table th {
-      border: 1px solid #000;
-      padding: 4px 6px;
-      vertical-align: middle;
-      width: 180px;
-    }
-
-    .gen-table th {
-      background: #ffd700;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .gen-table input,
-    .gen-table select,
-    .gen-table textarea {
-      border: none;
-      outline: none;
-      width: 100%;
-      background: transparent;
-      font-size: 12px;
-      resize: none;
-    }
-
-    .center {
-      text-align: center;
-    }
-
-    .bold {
-      font-weight: bold;
-    }
-
-    .result-pass {
-      background: #90ee90 !important;
-      font-weight: bold;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .result-fail {
-      background: #ff9999 !important;
-      font-weight: bold;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .result-pending {
-      font-weight: bold;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .sample-box {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .sample-box td {
-      border: 1px solid #000;
-      padding: 6px 10px;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .sample-box input {
-      border: none;
-      outline: none;
-      font-weight: bold;
-      font-size: 12px;
-      width: 80px;
-      background: transparent;
-    }
-
-    .defect-num {
-      text-align: center;
-      width: 40px;
-    }
-
-    .defect-qty {
-      text-align: center;
-      width: 70px;
-    }
-
-    .remarks-area {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .remarks-area textarea {
-      width: 100%;
-      min-height: 60px;
-      border: none;
-      outline: none;
-      font-size: 12px;
-      font-family: Arial;
-      resize: vertical;
-      background: transparent;
-    }
-
-    .images-section {
-      margin-top: 10px;
-    }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .img-card {
-      border: 2px solid #000;
-      background: #fff;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .img-card:hover {
-      border-color: #ffd700;
-    }
-
-    .img-preview {
-      width: 100%;
-      height: 220px;
-      object-fit: contain;
-      background: #e8e8e8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      color: #888;
-      cursor: pointer;
-      user-select: none;
-      border-bottom: 1px solid #ccc;
-      overflow: hidden;
-    }
-
-    .img-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .img-preview .upload-spinner {
-      display: none;
-      font-size: 11px;
-      color: #555;
-    }
-
-    .img-caption {
-      padding: 4px 6px;
-      font-size: 11px;
-      text-align: center;
-      border-bottom: 1px solid #ccc;
-      font-weight: bold;
-    }
-
-    .img-caption input {
-      border: none;
-      outline: none;
-      font-size: 11px;
-      font-weight: bold;
-      text-align: center;
-      width: 100%;
-      background: transparent;
-    }
-
-    .img-label-input {
-      padding: 4px 6px;
-      font-size: 11px;
-    }
-
-    .img-label-input input {
-      border: none;
-      border-bottom: 1px dashed #999;
-      outline: none;
-      font-size: 11px;
-      width: 100%;
-      background: transparent;
-    }
-
-    .file-input-hidden {
-      display: none;
-    }
-
-    .btn-bar {
-      display: flex;
-      gap: 12px;
-      margin: 16px 0;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 10px 28px;
-      border: 2px solid #000;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-      transition: all 0.15s;
-    }
-
-    .btn-add {
-      background: #ffd700;
-    }
-
-    .btn-add:hover {
-      background: #e6c200;
-    }
-
-    .btn-save {
-      background: #2ecc71;
-      color: #fff;
-    }
-
-    .btn-save:hover {
-      background: #27ae60;
-    }
-
-    .btn-load {
-      background: #3498db;
-      color: #fff;
-    }
-
-    .btn-load:hover {
-      background: #2980b9;
-    }
-
-    .btn-download {
-      background: #222;
-      color: #ffd700;
-    }
-
-    .btn-download:hover {
-      background: #000;
-    }
-
-    .btn-remove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: #ff4444;
-      color: #fff;
-      border: none;
-      width: 22px;
-      height: 22px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      border-radius: 2px;
-    }
-
-    .toast {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      background: #222;
-      color: #fff;
-      padding: 14px 24px;
-      border-radius: 6px;
-      font-size: 14px;
-      z-index: 9999;
-      display: none;
-      border-left: 5px solid #ffd700;
-    }
-
-    .toast.show {
-      display: block;
-    }
-
-    .toast.error {
-      border-left-color: #ff4444;
-    }
-
-    .toast.success {
-      border-left-color: #2ecc71;
-    }
-
-    .saved-badge {
-      display: inline-block;
-      background: #2ecc71;
-      color: #fff;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 3px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    .list-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 9998;
-    }
-
-    .list-modal.show {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .list-box {
-      background: #fff;
-      border: 2px solid #000;
-      padding: 20px;
-      width: 700px;
-      max-height: 80vh;
-      overflow-y: auto;
-      border-radius: 4px;
-    }
-
-    .list-box h2 {
-      font-size: 16px;
-      margin-bottom: 12px;
-      border-bottom: 2px solid #ffd700;
-      padding-bottom: 8px;
-    }
-
-    .insp-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      border: 1px solid #ddd;
-      margin-bottom: 6px;
-      border-radius: 3px;
-    }
-
-    .insp-item:hover {
-      background: #fffde7;
-    }
-
-    .insp-item-info {
-      flex: 1;
-    }
-
-    .insp-item-info strong {
-      font-size: 13px;
-    }
-
-    .insp-item-info span {
-      font-size: 11px;
-      color: #888;
-      display: block;
-    }
-
-    .insp-item-btns {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-sm {
-      padding: 5px 12px;
-      font-size: 11px;
-      border: 1px solid #000;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .btn-sm-load {
-      background: #ffd700;
-    }
-
-    .btn-sm-del {
-      background: #ff9999;
-    }
-
-    .result-badge {
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .badge-pass {
-      background: #90ee90;
-    }
-
-    .badge-fail {
-      background: #ff9999;
-    }
-
-    .badge-pending {
-      background: #ffe0b2;
-    }
-
-    .radio-group {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin: 0;
-      margin-left: 8px;
-    }
-
-    .radio-group input {
-      margin: 0;
-      vertical-align: middle;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 12px; background: #f0f0f0; }
+    .page { width: 100%; margin: 20px auto; background: #fff; padding: 20px; border: 2px solid #000; }
+    .main-title { text-align: center; font-size: 22px; font-weight: bold; background: #fff; border: 2px solid #000; padding: 10px; margin-bottom: 8px; letter-spacing: 1px; }
+    .info-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    .info-table td, .info-table th { border: 1px solid #000; padding: 4px 6px; vertical-align: middle; }
+    .info-table .label { font-weight: bold; white-space: nowrap; }
+    .info-table input, .info-table select { border: none; outline: none; width: 100%; background: transparent; font-size: 12px; }
+    .section-header { background: #ffd700; font-weight: bold; text-align: center; border: 1px solid #000; padding: 5px; margin: 8px 0 0; font-size: 13px; letter-spacing: 0.5px; }
+    .gen-table { width: 100%; border-collapse: collapse; }
+    .gen-table td, .gen-table th { border: 1px solid #000; padding: 4px 6px; vertical-align: middle; width: 180px; }
+    .gen-table th { background: #ffd700; font-weight: bold; text-align: center; }
+    .gen-table input, .gen-table select, .gen-table textarea { border: none; outline: none; width: 100%; background: transparent; font-size: 12px; resize: none; }
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .result-pass { background: #90ee90 !important; font-weight: bold; text-align: center; cursor: pointer; }
+    .result-fail { background: #ff9999 !important; font-weight: bold; text-align: center; cursor: pointer; }
+    .result-pending { font-weight: bold; text-align: center; cursor: pointer; }
+    .sample-box { width: 100%; border-collapse: collapse; }
+    .sample-box td { border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: center; }
+    .sample-box input { border: none; outline: none; font-weight: bold; font-size: 12px; width: 80px; background: transparent; }
+    .defect-num { text-align: center; width: 40px; }
+    .defect-qty { text-align: center; width: 70px; }
+    .remarks-area { width: 100%; border-collapse: collapse; }
+    .remarks-area textarea { width: 100%; min-height: 60px; border: none; outline: none; font-size: 12px; font-family: Arial; resize: vertical; background: transparent; }
+    .images-section { margin-top: 10px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px; }
+    .img-card { border: 2px solid #000; background: #fff; position: relative; display: flex; flex-direction: column; }
+    .img-card:hover { border-color: #ffd700; }
+    .img-preview { width: 100%; height: 220px; object-fit: contain; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #888; cursor: pointer; user-select: none; border-bottom: 1px solid #ccc; overflow: hidden; }
+    .img-preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .img-preview .upload-spinner { display: none; font-size: 11px; color: #555; }
+    .img-caption { padding: 4px 6px; font-size: 11px; text-align: center; border-bottom: 1px solid #ccc; font-weight: bold; }
+    .img-caption input { border: none; outline: none; font-size: 11px; font-weight: bold; text-align: center; width: 100%; background: transparent; }
+    .img-label-input { padding: 4px 6px; font-size: 11px; }
+    .img-label-input input { border: none; border-bottom: 1px dashed #999; outline: none; font-size: 11px; width: 100%; background: transparent; }
+    .file-input-hidden { display: none; }
+    .btn-bar { display: flex; gap: 12px; margin: 16px 0; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 10px 28px; border: 2px solid #000; cursor: pointer; font-weight: bold; font-size: 13px; letter-spacing: 0.5px; transition: all 0.15s; }
+    .btn-add { background: #ffd700; }
+    .btn-add:hover { background: #e6c200; }
+    .btn-save { background: #2ecc71; color: #fff; }
+    .btn-save:hover { background: #27ae60; }
+    .btn-load { background: #3498db; color: #fff; }
+    .btn-load:hover { background: #2980b9; }
+    .btn-download { background: #222; color: #ffd700; }
+    .btn-download:hover { background: #000; }
+    .btn-remove { position: absolute; top: 4px; right: 4px; background: #ff4444; color: #fff; border: none; width: 22px; height: 22px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; border-radius: 2px; }
+    .toast { position: fixed; top: 24px; right: 24px; background: #222; color: #fff; padding: 14px 24px; border-radius: 6px; font-size: 14px; z-index: 9999; display: none; border-left: 5px solid #ffd700; }
+    .toast.show { display: block; }
+    .toast.error { border-left-color: #ff4444; }
+    .toast.success { border-left-color: #2ecc71; }
+    .saved-badge { display: inline-block; background: #2ecc71; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
+    .list-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9998; }
+    .list-modal.show { display: flex; align-items: center; justify-content: center; }
+    .list-box { background: #fff; border: 2px solid #000; padding: 20px; width: 700px; max-height: 80vh; overflow-y: auto; border-radius: 4px; }
+    .list-box h2 { font-size: 16px; margin-bottom: 12px; border-bottom: 2px solid #ffd700; padding-bottom: 8px; }
+    .insp-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin-bottom: 6px; border-radius: 3px; }
+    .insp-item:hover { background: #fffde7; }
+    .insp-item-info { flex: 1; }
+    .insp-item-info strong { font-size: 13px; }
+    .insp-item-info span { font-size: 11px; color: #888; display: block; }
+    .insp-item-btns { display: flex; gap: 6px; }
+    .btn-sm { padding: 5px 12px; font-size: 11px; border: 1px solid #000; cursor: pointer; font-weight: bold; }
+    .btn-sm-load { background: #ffd700; }
+    .btn-sm-del { background: #ff9999; }
+    .result-badge { padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+    .badge-pass { background: #90ee90; }
+    .badge-fail { background: #ff9999; }
+    .badge-pending { background: #ffe0b2; }
+    .radio-group { display: flex; align-items: center; gap: 20px; }
+    .radio-group label { display: flex; align-items: center; gap: 5px; margin: 0; margin-left: 8px; }
+    .radio-group input { margin: 0; vertical-align: middle; }
   </style>
 </head>
-
 <body>
   <div class="toast" id="toast"></div>
   <div class="list-modal" id="listModal">
     <div class="list-box">
-      <h2>Saved Inspections <button onclick="closeModal()"
-          style="float:right;background:#ff4444;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-weight:bold;">✕
-          Close</button></h2>
+      <h2>Saved Inspections <button onclick="closeModal()" style="float:right;background:#ff4444;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-weight:bold;">✕ Close</button></h2>
       <div id="inspectionList"></div>
     </div>
   </div>
@@ -518,8 +96,7 @@
 
     <table class="info-table">
       <tr>
-        <td class="label" rowspan="3" style="width:140px;font-size:16px;text-align:center;background:#fff3cd;">
-          INSPECTION REPORT</td>
+        <td class="label" rowspan="3" style="width:140px;font-size:16px;text-align:center;background:#fff3cd;">INSPECTION REPORT</td>
         <td class="label" style="width:100px;">Buyer</td>
         <td><input id="buyer" placeholder="e.g. Basic Supply"></td>
         <td class="label" style="width:40px;">DPI</td>
@@ -605,13 +182,11 @@
     <table class="gen-table">
       <tr>
         <td class="result-pass" style="width:33%;" onclick="setResult('PASS')" id="resultPass">PASS</td>
-        <td class="result-fail" style="width:33%;" onclick="setResult('FAIL')" id="resultFail">FAIL, due to beyond AQL
-          and/or remark</td>
+        <td class="result-fail" style="width:33%;" onclick="setResult('FAIL')" id="resultFail">FAIL, due to beyond AQL and/or remark</td>
         <td class="result-pending" style="width:33%;" onclick="setResult('PENDING')" id="resultPending">PENDING</td>
       </tr>
       <tr>
-        <td colspan="3" style="padding:6px;"><input id="resultNote" style="width:100%;border:none;outline:none;"
-            placeholder="Result note..."></td>
+        <td colspan="3" style="padding:6px;"><input id="resultNote" style="width:100%;border:none;outline:none;" placeholder="Result note..."></td>
       </tr>
     </table>
     <br>
@@ -636,8 +211,7 @@
       <tbody id="categoryBody"></tbody>
     </table>
     <br>
-    <button class="btn btn-add" onclick="addCategoryRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add
-      Category Row</button>
+    <button class="btn btn-add" onclick="addCategoryRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add Category Row</button>
 
     <div class="section-header">DEFECT LIST</div>
     <table class="gen-table" id="defectTable">
@@ -660,18 +234,14 @@
         </tr>
         <tr>
           <td colspan="2" class="bold" style="text-align:right;">Allowed Defects According to AQL :</td>
-          <td class="center"><input id="aqlAllowCritical"
-              style="width:50px;text-align:center;border:none;outline:none;"></td>
-          <td class="center"><input id="aqlAllowMajor" style="width:50px;text-align:center;border:none;outline:none;"
-              value="14"></td>
-          <td class="center"><input id="aqlAllowMinor" style="width:50px;text-align:center;border:none;outline:none;"
-              value="21"></td>
+          <td class="center"><input id="aqlAllowCritical" style="width:50px;text-align:center;border:none;outline:none;"></td>
+          <td class="center"><input id="aqlAllowMajor" style="width:50px;text-align:center;border:none;outline:none;" value="14"></td>
+          <td class="center"><input id="aqlAllowMinor" style="width:50px;text-align:center;border:none;outline:none;" value="21"></td>
         </tr>
       </tfoot>
     </table>
     <br>
-    <button class="btn btn-add" onclick="addDefectRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add
-      Defect Row</button>
+    <button class="btn btn-add" onclick="addDefectRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add Defect Row</button>
 
     <div class="section-header">ARTICLE/COLOR WISE SELECTED CARTON DETAILS</div>
     <table class="gen-table" id="cartonTable">
@@ -687,8 +257,7 @@
       <tbody id="cartonBody"></tbody>
     </table>
     <br>
-    <button class="btn btn-add" onclick="addCartonRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add
-      Carton Row</button>
+    <button class="btn btn-add" onclick="addCartonRow()" style="background-color:rgb(127,184,41);width:100%;">+ Add Carton Row</button>
 
     <div class="section-header">INSPECTOR REMARKS</div>
     <table class="remarks-area">
@@ -708,8 +277,7 @@
       <button class="btn btn-save" onclick="saveInspection()">💾 Save</button>
       <button class="btn btn-load" onclick="openModal()">📂 Load Saved</button>
       <button class="btn btn-download" onclick="downloadExcel()">⬇ Download Excel</button>
-      <button class="btn btn-download" style="background:#ff4444;color:#fff;" onclick="downloadPDF()">📄 Download
-        PDF</button>
+      <button class="btn btn-download" style="background:#ff4444;color:#fff;" onclick="downloadPDF()">📄 Download PDF</button>
     </div>
   </div>
 
@@ -722,12 +290,12 @@
     const imageCardData = {};
 
     const defaultCategories = [{ name: "", ok: false, notok: false, attachment: "" }];
-    const defaultDefects = [{ name: "", critical: "", major: "", minor: "" }];
-    const defaultCartons = [{ article: "", qty: "", ratio: "", selected: "", condition: "" }];
-    const defaultCards = [];
+    const defaultDefects    = [{ name: "", critical: "", major: "", minor: "" }];
+    const defaultCartons    = [{ article: "", qty: "", ratio: "", selected: "", condition: "" }];
+    const defaultCards      = [];
 
     // ─── Toast ────────────────────────────────────────────────────────────────
-    function showToast(msg, type = 'success') {
+    function showToast(msg, type='success') {
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.className = `toast show ${type}`;
@@ -737,11 +305,11 @@
     // ─── Result selection ─────────────────────────────────────────────────────
     function setResult(r) {
       selectedResult = r;
-      ['Pass', 'Fail', 'Pending'].forEach(x => {
-        const el = document.getElementById('result' + x);
-        if (el) { el.style.outline = 'none'; el.style.opacity = ''; }
+      ['Pass','Fail','Pending'].forEach(x => {
+        const el = document.getElementById('result'+x);
+        if (el) { el.style.outline='none'; el.style.opacity=''; }
       });
-      const map = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
+      const map = { PASS:'resultPass', FAIL:'resultFail', PENDING:'resultPending' };
       if (r && map[r]) {
         const el = document.getElementById(map[r]);
         if (el) el.style.outline = '4px solid #000';
@@ -749,86 +317,86 @@
     }
 
     // ─── Category ─────────────────────────────────────────────────────────────
-    function buildCategories(data = defaultCategories) {
+    function buildCategories(data=defaultCategories) {
       document.getElementById('categoryBody').innerHTML = '';
       data.forEach(cat => addCategoryRow(cat));
     }
-    function addCategoryRow(d = {}) {
+    function addCategoryRow(d={}) {
       const tbody = document.getElementById('categoryBody');
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><input placeholder="Enter category..." value="${escHtml(d.name || '')}" style="width:100%;border:none;outline:none;"></td>
-        <td class="center"><input type="checkbox" ${d.ok ? 'checked' : ''}></td>
-        <td class="center"><input type="checkbox" ${d.notok ? 'checked' : ''}></td>
-        <td><input placeholder="Attachment / note..." value="${escHtml(d.attachment || '')}" style="width:100%;border:none;outline:none;"></td>`;
+        <td><input placeholder="Enter category..." value="${escHtml(d.name||'')}" style="width:100%;border:none;outline:none;"></td>
+        <td class="center"><input type="checkbox" ${d.ok?'checked':''}></td>
+        <td class="center"><input type="checkbox" ${d.notok?'checked':''}></td>
+        <td><input placeholder="Attachment / note..." value="${escHtml(d.attachment||'')}" style="width:100%;border:none;outline:none;"></td>`;
       tbody.appendChild(tr);
     }
 
     // ─── Defects ──────────────────────────────────────────────────────────────
-    function buildDefects(data = defaultDefects) {
-      document.getElementById('defectBody').innerHTML = '';
-      data.forEach((d, i) => addDefectRow(d, i + 1));
+    function buildDefects(data=defaultDefects) {
+      document.getElementById('defectBody').innerHTML='';
+      data.forEach((d,i) => addDefectRow(d, i+1));
     }
-    function addDefectRow(d = {}, num = null) {
+    function addDefectRow(d={}, num=null) {
       const tbody = document.getElementById('defectBody');
-      const rowNum = num || tbody.rows.length + 1;
+      const rowNum = num || tbody.rows.length+1;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="defect-num center">${rowNum}</td>
-        <td><input value="${escHtml(d.name || '')}" style="width:100%;border:none;outline:none;" oninput="updateTotals()"></td>
-        <td class="center"><input type="number" value="${d.critical || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
-        <td class="center"><input type="number" value="${d.major || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
-        <td class="center"><input type="number" value="${d.minor || ''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>`;
+        <td><input value="${escHtml(d.name||'')}" style="width:100%;border:none;outline:none;" oninput="updateTotals()"></td>
+        <td class="center"><input type="number" value="${d.critical||''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
+        <td class="center"><input type="number" value="${d.major||''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>
+        <td class="center"><input type="number" value="${d.minor||''}" style="width:50px;text-align:center;border:none;outline:none;" oninput="updateTotals()"></td>`;
       tbody.appendChild(tr);
       updateTotals();
     }
     function updateTotals() {
-      let c = 0, m = 0, n = 0;
+      let c=0,m=0,n=0;
       document.querySelectorAll('#defectBody tr').forEach(tr => {
         const inp = tr.querySelectorAll('td input[type="number"]');
-        if (inp[0]) c += parseInt(inp[0].value || 0);
-        if (inp[1]) m += parseInt(inp[1].value || 0);
-        if (inp[2]) n += parseInt(inp[2].value || 0);
+        if(inp[0]) c+=parseInt(inp[0].value||0);
+        if(inp[1]) m+=parseInt(inp[1].value||0);
+        if(inp[2]) n+=parseInt(inp[2].value||0);
       });
-      document.getElementById('totalCritical').textContent = c || '';
-      document.getElementById('totalMajor').textContent = m || '';
-      document.getElementById('totalMinor').textContent = n || '';
+      document.getElementById('totalCritical').textContent = c||'';
+      document.getElementById('totalMajor').textContent    = m||'';
+      document.getElementById('totalMinor').textContent    = n||'';
     }
 
     // ─── Cartons ──────────────────────────────────────────────────────────────
-    function buildCartons(data = defaultCartons) {
-      document.getElementById('cartonBody').innerHTML = '';
+    function buildCartons(data=defaultCartons) {
+      document.getElementById('cartonBody').innerHTML='';
       data.forEach(c => addCartonRow(c));
     }
-    function addCartonRow(d = {}) {
+    function addCartonRow(d={}) {
       const tbody = document.getElementById('cartonBody');
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><input value="${escHtml(d.article || '')}" style="width:100%;border:none;outline:none;"></td>
-        <td><textarea style="width:100%;border:none;outline:none;resize:none;min-height:36px;">${escHtml(d.qty || '')}</textarea></td>
-        <td><input value="${escHtml(d.ratio || '')}" style="width:100%;border:none;outline:none;"></td>
-        <td class="center"><input type="number" value="${d.selected || ''}" style="width:60px;text-align:center;border:none;outline:none;"></td>
-        <td class="center"><input value="${escHtml(d.condition || '')}" style="width:100%;text-align:center;border:none;outline:none;"></td>`;
+        <td><input value="${escHtml(d.article||'')}" style="width:100%;border:none;outline:none;"></td>
+        <td><textarea style="width:100%;border:none;outline:none;resize:none;min-height:36px;">${escHtml(d.qty||'')}</textarea></td>
+        <td><input value="${escHtml(d.ratio||'')}" style="width:100%;border:none;outline:none;"></td>
+        <td class="center"><input type="number" value="${d.selected||''}" style="width:60px;text-align:center;border:none;outline:none;"></td>
+        <td class="center"><input value="${escHtml(d.condition||'')}" style="width:100%;text-align:center;border:none;outline:none;"></td>`;
       tbody.appendChild(tr);
     }
 
     // ─── Image Cards ──────────────────────────────────────────────────────────
-    function buildCards(data = defaultCards) {
-      document.getElementById('cardsGrid').innerHTML = '';
-      cardCounter = 0;
+    function buildCards(data=defaultCards) {
+      document.getElementById('cardsGrid').innerHTML='';
+      cardCounter=0;
       Object.keys(imageCardData).forEach(k => delete imageCardData[k]);
-      if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
-        data.forEach(card => addCard(card.caption || '', card.label || '', card));
+      if (Array.isArray(data) && data.length>0 && typeof data[0]==='object') {
+        data.forEach(card => addCard(card.caption||'', card.label||'', card));
       } else {
         data.forEach(cap => addCard(cap));
       }
     }
-    function addCard(caption = '', label = '', savedCard = null) {
-      const id = 'card_' + (cardCounter++);
-      const grid = document.getElementById('cardsGrid');
-      const div = document.createElement('div');
-      div.className = 'img-card';
-      div.id = id;
+    function addCard(caption='', label='', savedCard=null) {
+      const id='card_'+(cardCounter++);
+      const grid=document.getElementById('cardsGrid');
+      const div=document.createElement('div');
+      div.className='img-card';
+      div.id=id;
 
       const hasImage = savedCard && (savedCard.url || savedCard.filename);
 
@@ -855,191 +423,196 @@
     }
 
     function loadImageWithFallback(id, savedCard) {
-      const prev = document.getElementById('prev_' + id);
-      if (!prev) return;
+      // Use setTimeout so DOM is fully ready before we query prev_id
+      setTimeout(function() {
+        const prev = document.getElementById('prev_' + id);
+        if (!prev) { console.warn('[IMG] prev element not found for', id); return; }
 
-      const filename = savedCard.filename || '';
-      const storedUrl = savedCard.url || '';
+        const filename = (savedCard.filename || '').trim();
+        const storedUrl = (savedCard.url || '').trim();
 
-      // Build list of URLs to try in order
-      const urlsToTry = [];
+        console.log('[IMG] Loading card:', id, '| filename:', filename, '| storedUrl:', storedUrl);
 
-      // 1. Stored URL as-is (relative, browser resolves from current page)
-      if (storedUrl) urlsToTry.push(storedUrl);
+        if (!filename && !storedUrl) {
+          prev.innerHTML = '<span style="color:#888;font-size:12px;">Click to add image</span>';
+          return;
+        }
 
-      // 2. /uploads/filename  (most common Express static setup)
-      if (filename) urlsToTry.push('/uploads/' + filename);
+        // Build candidate URLs — skip empty strings
+        const candidates = [];
+        if (storedUrl)  candidates.push(storedUrl);                      // as stored in DB
+        if (filename)   candidates.push('/uploads/' + filename);          // standard Express static
+        if (filename)   candidates.push('/public/uploads/' + filename);   // alternate
+        if (filename)   candidates.push('/static/uploads/' + filename);   // another common path
+        if (storedUrl && !storedUrl.startsWith('http')) {
+          candidates.push(window.location.origin + (storedUrl.startsWith('/') ? storedUrl : '/' + storedUrl));
+        }
 
-      // 3. /public/uploads/filename
-      if (filename) urlsToTry.push('/public/uploads/' + filename);
+        // Dedupe, remove empty
+        const unique = [...new Set(candidates)].filter(u => u && u.trim() !== '');
+        console.log('[IMG] Will try URLs:', unique);
 
-      // 4. Full origin + stored url
-      if (storedUrl && !storedUrl.startsWith('http')) {
-        urlsToTry.push(window.location.origin + (storedUrl.startsWith('/') ? storedUrl : '/' + storedUrl));
-      }
-
-      // Remove duplicates
-      const unique = [...new Set(urlsToTry)];
-
-      tryNextUrl(prev, unique, 0, filename);
+        tryNextUrl(prev, unique, 0, filename);
+      }, 0);
     }
 
     function tryNextUrl(prev, urls, index, filename) {
       if (index >= urls.length) {
-        // All URLs failed
+        console.warn('[IMG] All URLs failed for:', filename, '| tried:', urls);
         prev.innerHTML = `<div style="text-align:center;padding:10px;">
           <div style="color:#c00;font-size:12px;margin-bottom:4px;">⚠ Image not found</div>
           <div style="color:#999;font-size:10px;">${escHtml(filename)}</div>
+          <div style="color:#555;font-size:9px;margin-top:4px;">Tried: ${urls.map(u=>'<br>'+u).join('')}</div>
           <div style="color:#aaa;font-size:9px;margin-top:4px;">Click to re-upload</div>
         </div>`;
         return;
       }
 
       const url = urls[index];
+      console.log('[IMG] Trying URL ' + (index+1) + '/' + urls.length + ':', url);
       const img = new Image();
-      img.onload = function () {
+      img.onload = function() {
+        console.log('[IMG] ✅ SUCCESS:', url);
         prev.innerHTML = '';
         prev.style.background = 'transparent';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-        img.style.display = 'block';
+        img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
         prev.appendChild(img);
       };
-      img.onerror = function () {
+      img.onerror = function() {
+        console.warn('[IMG] ❌ Failed:', url);
         tryNextUrl(prev, urls, index + 1, filename);
       };
       img.src = url;
     }
-    function triggerFileInput(id) { document.getElementById('file_' + id).click(); }
+    function triggerFileInput(id) { document.getElementById('file_'+id).click(); }
     async function uploadImage(id, input) {
-      if (!input.files || !input.files[0]) return;
-      const prev = document.getElementById("prev_" + id);
-      prev.innerHTML = '<span class="upload-spinner" style="display:block;">⏳ Uploading...</span>';
-      const formData = new FormData();
+      if (!input.files||!input.files[0]) return;
+      const prev=document.getElementById("prev_"+id);
+      prev.innerHTML='<span class="upload-spinner" style="display:block;">⏳ Uploading...</span>';
+      const formData=new FormData();
       formData.append("image", input.files[0]);
       try {
-        const res = await fetch("/api/inspections/upload/image", { method: "POST", body: formData });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message);
+        const res=await fetch("/api/inspections/upload/image",{method:"POST",body:formData});
+        const data=await res.json();
+        if(!data.success) throw new Error(data.message);
         let imgUrl = data.url || "";
         if (imgUrl && !imgUrl.startsWith("http") && !imgUrl.startsWith("blob")) {
           imgUrl = window.location.origin + (imgUrl.startsWith("/") ? imgUrl : "/" + imgUrl);
         }
-        imageCardData[id] = { filename: data.filename, url: data.url, originalName: data.originalName, mimetype: data.mimetype };
-        prev.innerHTML = `<img src="${imgUrl}" alt="img">`;
-        showToast("Image uploaded ✓", "success");
-      } catch (err) {
-        prev.innerHTML = '<span style="color:#f00;">Upload failed</span>';
-        showToast("Upload failed: " + err.message, "error");
+        imageCardData[id]={filename:data.filename,url:data.url,originalName:data.originalName,mimetype:data.mimetype};
+        prev.innerHTML=`<img src="${imgUrl}" alt="img">`;
+        showToast("Image uploaded ✓","success");
+      } catch(err) {
+        prev.innerHTML='<span style="color:#f00;">Upload failed</span>';
+        showToast("Upload failed: "+err.message,"error");
       }
     }
     function removeCard(id) {
-      const el = document.getElementById(id);
-      if (el) el.remove();
+      const el=document.getElementById(id);
+      if(el) el.remove();
       delete imageCardData[id];
     }
 
     // ─── Collect form data ────────────────────────────────────────────────────
     function collectFormData() {
-      const v = id => (document.getElementById(id) || {}).value || '';
-      const chk = id => (document.getElementById(id) || {}).checked || false;
-      const categories = [];
+      const v=id=>(document.getElementById(id)||{}).value||'';
+      const chk=id=>(document.getElementById(id)||{}).checked||false;
+      const categories=[];
       document.querySelectorAll('#categoryBody tr').forEach(tr => {
-        const inp = tr.querySelectorAll('input');
-        categories.push({ name: inp[0]?.value || '', ok: inp[1]?.checked || false, notok: inp[2]?.checked || false, attachment: inp[3]?.value || '' });
+        const inp=tr.querySelectorAll('input');
+        categories.push({name:inp[0]?.value||'',ok:inp[1]?.checked||false,notok:inp[2]?.checked||false,attachment:inp[3]?.value||''});
       });
-      const defects = [];
-      document.querySelectorAll('#defectBody tr').forEach((tr, i) => {
-        const inp = tr.querySelectorAll('input');
-        defects.push({ sno: i + 1, name: inp[0]?.value || '', critical: inp[1]?.value || '', major: inp[2]?.value || '', minor: inp[3]?.value || '' });
+      const defects=[];
+      document.querySelectorAll('#defectBody tr').forEach((tr,i) => {
+        const inp=tr.querySelectorAll('input');
+        defects.push({sno:i+1,name:inp[0]?.value||'',critical:inp[1]?.value||'',major:inp[2]?.value||'',minor:inp[3]?.value||''});
       });
-      const cartons = [];
+      const cartons=[];
       document.querySelectorAll('#cartonBody tr').forEach(tr => {
-        const inp = tr.querySelectorAll('input,textarea');
-        cartons.push({ article: inp[0]?.value || '', qty: inp[1]?.value || '', ratio: inp[2]?.value || '', selected: inp[3]?.value || '', condition: inp[4]?.value || '' });
+        const inp=tr.querySelectorAll('input,textarea');
+        cartons.push({article:inp[0]?.value||'',qty:inp[1]?.value||'',ratio:inp[2]?.value||'',selected:inp[3]?.value||'',condition:inp[4]?.value||''});
       });
-      const imageCards = [];
+      const imageCards=[];
       document.querySelectorAll('#cardsGrid .img-card').forEach(card => {
-        const id = card.id;
-        const caption = card.querySelector('.img-caption input')?.value || '';
-        const label = card.querySelector('.img-label-input input')?.value || '';
-        const imgData = imageCardData[id] || {};
-        imageCards.push({ caption, label, filename: imgData.filename || '', url: imgData.url || '', originalName: imgData.originalName || '', mimetype: imgData.mimetype || '' });
+        const id=card.id;
+        const caption=card.querySelector('.img-caption input')?.value||'';
+        const label=card.querySelector('.img-label-input input')?.value||'';
+        const imgData=imageCardData[id]||{};
+        imageCards.push({caption,label,filename:imgData.filename||'',url:imgData.url||'',originalName:imgData.originalName||'',mimetype:imgData.mimetype||''});
       });
       return {
-        buyer: v('buyer'), dpi: v('dpi'), fri: v('fri'), poStyle: v('poStyle'), factory: v('factory'),
-        inspDate: v('inspDate'), unit: v('unit'), reInspDate: v('reInspDate'),
-        article: v('article'), colour: v('colour'), orderQtyPcs: v('orderQtyPcs'), offeredQtyPcs: v('offeredQtyPcs'),
-        orderQtyCtns: v('orderQtyCtns'), offeredQtyCtns: v('offeredQtyCtns'), unitsPerCarton: v('unitsPerCarton'),
-        aqlCritical: v('aqlCritical'), aqlMajor: v('aqlMajor'), aqlMinor: v('aqlMinor'),
-        reInspYes: chk('reInspYes'), reInspNo: chk('reInspNo'), approvedYes: chk('approvedYes'), approvedNo: chk('approvedNo'),
-        inspectorName: v('inspectorName'), inspLocation: v('inspLocation'),
-        result: selectedResult, resultNote: v('resultNote'),
-        samplePcs: v('samplePcs'), selectedCartons: v('selectedCartons'),
-        aqlAllowCritical: v('aqlAllowCritical'), aqlAllowMajor: v('aqlAllowMajor'), aqlAllowMinor: v('aqlAllowMinor'),
-        inspectorRemarks: v('inspectorRemarks'),
-        categories, defects, cartons, imageCards
+        buyer:v('buyer'),dpi:v('dpi'),fri:v('fri'),poStyle:v('poStyle'),factory:v('factory'),
+        inspDate:v('inspDate'),unit:v('unit'),reInspDate:v('reInspDate'),
+        article:v('article'),colour:v('colour'),orderQtyPcs:v('orderQtyPcs'),offeredQtyPcs:v('offeredQtyPcs'),
+        orderQtyCtns:v('orderQtyCtns'),offeredQtyCtns:v('offeredQtyCtns'),unitsPerCarton:v('unitsPerCarton'),
+        aqlCritical:v('aqlCritical'),aqlMajor:v('aqlMajor'),aqlMinor:v('aqlMinor'),
+        reInspYes:chk('reInspYes'),reInspNo:chk('reInspNo'),approvedYes:chk('approvedYes'),approvedNo:chk('approvedNo'),
+        inspectorName:v('inspectorName'),inspLocation:v('inspLocation'),
+        result:selectedResult,resultNote:v('resultNote'),
+        samplePcs:v('samplePcs'),selectedCartons:v('selectedCartons'),
+        aqlAllowCritical:v('aqlAllowCritical'),aqlAllowMajor:v('aqlAllowMajor'),aqlAllowMinor:v('aqlAllowMinor'),
+        inspectorRemarks:v('inspectorRemarks'),
+        categories,defects,cartons,imageCards
       };
     }
 
     // ─── Save ─────────────────────────────────────────────────────────────────
     async function saveInspection() {
-      const btn = document.querySelector('.btn-save');
-      btn.textContent = '⏳ Saving...'; btn.disabled = true;
+      const btn=document.querySelector('.btn-save');
+      btn.textContent='⏳ Saving...'; btn.disabled=true;
       try {
-        const body = collectFormData();
-        const method = currentId ? 'PUT' : 'POST';
-        const url = currentId ? `/api/inspections/${currentId}` : '/api/inspections';
-        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message);
-        currentId = data.data._id;
-        document.getElementById('savedBadge').style.display = 'inline-block';
-        showToast(method === 'POST' ? '✅ Saved!' : '✅ Updated!', 'success');
-      } catch (err) { showToast('❌ Save failed: ' + err.message, 'error'); }
-      btn.textContent = '💾 Save'; btn.disabled = false;
+        const body=collectFormData();
+        const method=currentId?'PUT':'POST';
+        const url=currentId?`/api/inspections/${currentId}`:'/api/inspections';
+        const res=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const data=await res.json();
+        if(!data.success) throw new Error(data.message);
+        currentId=data.data._id;
+        document.getElementById('savedBadge').style.display='inline-block';
+        showToast(method==='POST'?'✅ Saved!':'✅ Updated!','success');
+      } catch(err) { showToast('❌ Save failed: '+err.message,'error'); }
+      btn.textContent='💾 Save'; btn.disabled=false;
     }
 
     // ─── Download Excel ───────────────────────────────────────────────────────
     async function downloadExcel() {
-      if (!currentId) { showToast('⚠️ Please save the inspection first!', 'error'); return; }
-      const btn = document.querySelector('.btn-download');
-      btn.textContent = '⏳ Generating...'; btn.disabled = true;
+      if(!currentId){ showToast('⚠️ Please save the inspection first!','error'); return; }
+      const btn=document.querySelector('.btn-download');
+      btn.textContent='⏳ Generating...'; btn.disabled=true;
       try {
-        const saveRes = await fetch(`/api/inspections/${currentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(collectFormData()) });
-        const saveData = await saveRes.json();
-        if (!saveData.success) throw new Error(saveData.message);
-        window.location.href = `/api/inspections/${currentId}/excel`;
-        showToast('✅ Excel downloading...', 'success');
-      } catch (err) { showToast('❌ Error: ' + err.message, 'error'); }
-      btn.textContent = '⬇ Download Excel'; btn.disabled = false;
+        const saveRes=await fetch(`/api/inspections/${currentId}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(collectFormData())});
+        const saveData=await saveRes.json();
+        if(!saveData.success) throw new Error(saveData.message);
+        window.location.href=`/api/inspections/${currentId}/excel`;
+        showToast('✅ Excel downloading...','success');
+      } catch(err){ showToast('❌ Error: '+err.message,'error'); }
+      btn.textContent='⬇ Download Excel'; btn.disabled=false;
     }
 
     // ─── Load Saved ───────────────────────────────────────────────────────────
     async function openModal() {
       document.getElementById('listModal').classList.add('show');
-      document.getElementById('inspectionList').innerHTML = '<p style="text-align:center;padding:20px;">Loading...</p>';
+      document.getElementById('inspectionList').innerHTML='<p style="text-align:center;padding:20px;">Loading...</p>';
       try {
-        const res = await fetch('/api/inspections');
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message);
+        const res=await fetch('/api/inspections');
+        const data=await res.json();
+        if(!data.success) throw new Error(data.message);
         renderList(data.data);
-      } catch (err) { document.getElementById('inspectionList').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+      } catch(err){ document.getElementById('inspectionList').innerHTML=`<p style="color:red;">Error: ${err.message}</p>`; }
     }
-    function closeModal() { document.getElementById('listModal').classList.remove('show'); }
+    function closeModal(){ document.getElementById('listModal').classList.remove('show'); }
     function renderList(items) {
-      const div = document.getElementById('inspectionList');
-      if (!items.length) { div.innerHTML = '<p style="text-align:center;padding:20px;color:#888;">No inspections saved yet.</p>'; return; }
-      div.innerHTML = items.map(item => `
+      const div=document.getElementById('inspectionList');
+      if(!items.length){ div.innerHTML='<p style="text-align:center;padding:20px;color:#888;">No inspections saved yet.</p>'; return; }
+      div.innerHTML=items.map(item=>`
         <div class="insp-item">
           <div class="insp-item-info">
-            <strong>${escHtml(item.buyer || '(no buyer)')} — ${escHtml(item.poStyle || '(no PO)')}</strong>
-            <span>Factory: ${escHtml(item.factory || '—')} | Date: ${item.inspDate || '—'}</span>
+            <strong>${escHtml(item.buyer||'(no buyer)')} — ${escHtml(item.poStyle||'(no PO)')}</strong>
+            <span>Factory: ${escHtml(item.factory||'—')} | Date: ${item.inspDate||'—'}</span>
             <span>Created: ${new Date(item.createdAt).toLocaleString()}</span>
           </div>
           <div style="margin:0 12px;">
-            <span class="result-badge ${item.result === 'PASS' ? 'badge-pass' : item.result === 'FAIL' ? 'badge-fail' : 'badge-pending'}">${item.result || '—'}</span>
+            <span class="result-badge ${item.result==='PASS'?'badge-pass':item.result==='FAIL'?'badge-fail':'badge-pending'}">${item.result||'—'}</span>
           </div>
           <div class="insp-item-btns">
             <button class="btn-sm btn-sm-load" onclick="loadInspection('${item._id}')">Load</button>
@@ -1049,57 +622,57 @@
     }
     async function loadInspection(id) {
       try {
-        const res = await fetch(`/api/inspections/${id}`);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message);
+        const res=await fetch(`/api/inspections/${id}`);
+        const data=await res.json();
+        if(!data.success) throw new Error(data.message);
         populateForm(data.data); closeModal();
-        showToast('✅ Inspection loaded!', 'success');
-      } catch (err) { showToast('❌ Load failed: ' + err.message, 'error'); }
+        showToast('✅ Inspection loaded!','success');
+      } catch(err){ showToast('❌ Load failed: '+err.message,'error'); }
     }
     async function deleteInspection(id, btn) {
-      if (!confirm('Delete this inspection?')) return;
-      btn.textContent = '...';
+      if(!confirm('Delete this inspection?')) return;
+      btn.textContent='...';
       try {
-        const res = await fetch(`/api/inspections/${id}`, { method: 'DELETE' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message);
-        showToast('Deleted!', 'success'); openModal();
-      } catch (err) { showToast('Delete failed: ' + err.message, 'error'); }
+        const res=await fetch(`/api/inspections/${id}`,{method:'DELETE'});
+        const data=await res.json();
+        if(!data.success) throw new Error(data.message);
+        showToast('Deleted!','success'); openModal();
+      } catch(err){ showToast('Delete failed: '+err.message,'error'); }
     }
 
     // ─── Populate form ────────────────────────────────────────────────────────
     function populateForm(d) {
-      const fields = ['buyer', 'dpi', 'fri', 'poStyle', 'factory', 'inspDate', 'unit', 'reInspDate',
-        'article', 'colour', 'orderQtyPcs', 'offeredQtyPcs', 'orderQtyCtns', 'offeredQtyCtns',
-        'unitsPerCarton', 'aqlCritical', 'aqlMajor', 'aqlMinor', 'inspectorName', 'inspLocation',
-        'resultNote', 'samplePcs', 'selectedCartons', 'aqlAllowCritical', 'aqlAllowMajor',
-        'aqlAllowMinor', 'inspectorRemarks'];
-      fields.forEach(f => { const el = document.getElementById(f); if (el && d[f] !== undefined) el.value = d[f]; });
-      ['reInspYes', 'reInspNo', 'approvedYes', 'approvedNo'].forEach(f => { const el = document.getElementById(f); if (el) el.checked = !!d[f]; });
-      currentId = d._id;
-      document.getElementById('savedBadge').style.display = 'inline-block';
-      setResult(d.result || '');
-      buildCategories(d.categories && d.categories.length ? d.categories : defaultCategories);
-      buildDefects(d.defects && d.defects.length ? d.defects : defaultDefects);
-      buildCartons(d.cartons && d.cartons.length ? d.cartons : defaultCartons);
-      buildCards(d.imageCards && d.imageCards.length ? d.imageCards : defaultCards);
+      const fields=['buyer','dpi','fri','poStyle','factory','inspDate','unit','reInspDate',
+        'article','colour','orderQtyPcs','offeredQtyPcs','orderQtyCtns','offeredQtyCtns',
+        'unitsPerCarton','aqlCritical','aqlMajor','aqlMinor','inspectorName','inspLocation',
+        'resultNote','samplePcs','selectedCartons','aqlAllowCritical','aqlAllowMajor',
+        'aqlAllowMinor','inspectorRemarks'];
+      fields.forEach(f=>{ const el=document.getElementById(f); if(el&&d[f]!==undefined) el.value=d[f]; });
+      ['reInspYes','reInspNo','approvedYes','approvedNo'].forEach(f=>{ const el=document.getElementById(f); if(el) el.checked=!!d[f]; });
+      currentId=d._id;
+      document.getElementById('savedBadge').style.display='inline-block';
+      setResult(d.result||'');
+      buildCategories(d.categories&&d.categories.length?d.categories:defaultCategories);
+      buildDefects(d.defects&&d.defects.length?d.defects:defaultDefects);
+      buildCartons(d.cartons&&d.cartons.length?d.cartons:defaultCartons);
+      buildCards(d.imageCards&&d.imageCards.length?d.imageCards:defaultCards);
     }
 
     // ─── New Inspection ───────────────────────────────────────────────────────
     function newInspection() {
-      if (!confirm('Start a new inspection? Unsaved changes will be lost.')) return;
-      currentId = null; selectedResult = '';
-      document.getElementById('savedBadge').style.display = 'none';
-      ['Pass', 'Fail', 'Pending'].forEach(x => { const el = document.getElementById('result' + x); if (el) { el.style.outline = 'none'; el.style.opacity = ''; } });
-      ['buyer', 'dpi', 'fri', 'poStyle', 'factory', 'inspDate', 'unit', 'reInspDate', 'article', 'colour',
-        'orderQtyPcs', 'offeredQtyPcs', 'orderQtyCtns', 'offeredQtyCtns', 'unitsPerCarton',
-        'aqlCritical', 'aqlMajor', 'aqlMinor', 'inspectorName', 'inspLocation',
-        'resultNote', 'inspectorRemarks', 'samplePcs', 'selectedCartons',
-        'aqlAllowCritical', 'aqlAllowMajor', 'aqlAllowMinor'].forEach(f => {
-          const el = document.getElementById(f); if (el) el.value = '';
-        });
-      ['reInspYes', 'reInspNo', 'approvedYes', 'approvedNo'].forEach(f => {
-        const el = document.getElementById(f); if (el) el.checked = false;
+      if(!confirm('Start a new inspection? Unsaved changes will be lost.')) return;
+      currentId=null; selectedResult='';
+      document.getElementById('savedBadge').style.display='none';
+      ['Pass','Fail','Pending'].forEach(x=>{ const el=document.getElementById('result'+x); if(el){el.style.outline='none';el.style.opacity='';} });
+      ['buyer','dpi','fri','poStyle','factory','inspDate','unit','reInspDate','article','colour',
+       'orderQtyPcs','offeredQtyPcs','orderQtyCtns','offeredQtyCtns','unitsPerCarton',
+       'aqlCritical','aqlMajor','aqlMinor','inspectorName','inspLocation',
+       'resultNote','inspectorRemarks','samplePcs','selectedCartons',
+       'aqlAllowCritical','aqlAllowMajor','aqlAllowMinor'].forEach(f=>{
+        const el=document.getElementById(f); if(el) el.value='';
+      });
+      ['reInspYes','reInspNo','approvedYes','approvedNo'].forEach(f=>{
+        const el=document.getElementById(f); if(el) el.checked=false;
       });
       buildCategories(defaultCategories);
       buildDefects(defaultDefects);
@@ -1109,147 +682,147 @@
 
     // ─── Utility ──────────────────────────────────────────────────────────────
     function escHtml(str) {
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // PASTE THIS ENTIRE BLOCK to replace the old downloadPDF() function in your HTML
+// PASTE THIS ENTIRE BLOCK to replace the old downloadPDF() function in your HTML
 
-    function downloadPDF() {
-      const toast = document.getElementById('toast');
-      if (toast) toast.style.display = 'none';
+function downloadPDF() {
+  const toast = document.getElementById('toast');
+  if (toast) toast.style.display = 'none';
 
-      // ── 1. Hide interactive / UI-only elements ──────────────────────────────
-      const hideEls = [];
+  // ── 1. Hide interactive / UI-only elements ──────────────────────────────
+  const hideEls = [];
 
-      // Hide buttons
-      document.querySelectorAll('button').forEach(btn => {
-        hideEls.push({ el: btn, prop: 'display', prev: btn.style.display });
-        btn.style.display = 'none';
-      });
+  // Hide buttons
+  document.querySelectorAll('button').forEach(btn => {
+    hideEls.push({ el: btn, prop: 'display', prev: btn.style.display });
+    btn.style.display = 'none';
+  });
 
-      // Hide the "Saved" green badge
-      const savedBadge = document.getElementById('savedBadge');
-      if (savedBadge) {
-        hideEls.push({ el: savedBadge, prop: 'display', prev: savedBadge.style.display });
-        savedBadge.style.display = 'none';
+  // Hide the "Saved" green badge
+  const savedBadge = document.getElementById('savedBadge');
+  if (savedBadge) {
+    hideEls.push({ el: savedBadge, prop: 'display', prev: savedBadge.style.display });
+    savedBadge.style.display = 'none';
+  }
+
+  // ── 2. Replace inputs with clean <span> so placeholder text never shows ──
+  const inputReplacements = [];
+  document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea').forEach(el => {
+    const span = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
+    span.textContent = el.value || '';  // empty stays empty — no placeholder
+    span.style.cssText = window.getComputedStyle(el).cssText;
+    span.style.display = 'inline-block';
+    span.style.width = '100%';
+    span.style.whiteSpace = 'pre-wrap';
+    span.style.wordBreak = 'break-word';
+    span.style.minHeight = el.tagName === 'TEXTAREA' ? Math.max(el.scrollHeight, 40) + 'px' : '';
+    span.style.border = 'none';
+    span.style.outline = 'none';
+    span.style.background = 'transparent';
+    span.style.fontFamily = 'Arial, sans-serif';
+    span.style.fontSize = '12px';
+    el.parentNode.insertBefore(span, el);
+    el.style.display = 'none';
+    inputReplacements.push({ span, input: el });
+  });
+
+  // ── 3. Fix checkbox / radio display ─────────────────────────────────────
+  const checkboxReplacements = [];
+  document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
+    const span = document.createElement('span');
+    span.textContent = el.checked ? '☑' : '☐';
+    span.style.fontSize = '13px';
+    el.parentNode.insertBefore(span, el);
+    el.style.display = 'none';
+    checkboxReplacements.push({ span, input: el });
+  });
+
+  // ── 4. Highlight the selected PASS/FAIL/PENDING result cell ─────────────
+  //    Add a thick black border outline to whichever is selected
+  const resultMap = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
+  const prevOutlines = {};
+  Object.entries(resultMap).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      prevOutlines[id] = el.style.outline;
+      if (key === selectedResult) {
+        el.style.outline = '4px solid #000';
+        el.style.fontWeight = 'bold';
+      } else {
+        el.style.outline = 'none';
+        el.style.opacity = '0.45';  // dim unselected
       }
+    }
+  });
 
-      // ── 2. Replace inputs with clean <span> so placeholder text never shows ──
-      const inputReplacements = [];
-      document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea').forEach(el => {
-        const span = document.createElement(el.tagName === 'TEXTAREA' ? 'div' : 'span');
-        span.textContent = el.value || '';  // empty stays empty — no placeholder
-        span.style.cssText = window.getComputedStyle(el).cssText;
-        span.style.display = 'inline-block';
-        span.style.width = '100%';
-        span.style.whiteSpace = 'pre-wrap';
-        span.style.wordBreak = 'break-word';
-        span.style.minHeight = el.tagName === 'TEXTAREA' ? Math.max(el.scrollHeight, 40) + 'px' : '';
-        span.style.border = 'none';
-        span.style.outline = 'none';
-        span.style.background = 'transparent';
-        span.style.fontFamily = 'Arial, sans-serif';
-        span.style.fontSize = '12px';
-        el.parentNode.insertBefore(span, el);
-        el.style.display = 'none';
-        inputReplacements.push({ span, input: el });
-      });
+  // ── 5. Image cards: force 2-column grid, 3 rows per page (=6 per page) ──
+  const grid = document.getElementById('cardsGrid');
+  const prevGridStyle = grid.style.cssText;
 
-      // ── 3. Fix checkbox / radio display ─────────────────────────────────────
-      const checkboxReplacements = [];
-      document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
-        const span = document.createElement('span');
-        span.textContent = el.checked ? '☑' : '☐';
-        span.style.fontSize = '13px';
-        el.parentNode.insertBefore(span, el);
-        el.style.display = 'none';
-        checkboxReplacements.push({ span, input: el });
-      });
+  // We'll use CSS columns approach: wrap each pair of cards in a page-chunk div
+  const cards = Array.from(document.querySelectorAll('.img-card'));
+  const prevCardStyles = cards.map(c => c.style.cssText);
 
-      // ── 4. Highlight the selected PASS/FAIL/PENDING result cell ─────────────
-      //    Add a thick black border outline to whichever is selected
-      const resultMap = { PASS: 'resultPass', FAIL: 'resultFail', PENDING: 'resultPending' };
-      const prevOutlines = {};
-      Object.entries(resultMap).forEach(([key, id]) => {
-        const el = document.getElementById(id);
-        if (el) {
-          prevOutlines[id] = el.style.outline;
-          if (key === selectedResult) {
-            el.style.outline = '4px solid #000';
-            el.style.fontWeight = 'bold';
-          } else {
-            el.style.outline = 'none';
-            el.style.opacity = '0.45';  // dim unselected
-          }
-        }
-      });
+  // Remove cards from grid temporarily
+  cards.forEach(card => grid.removeChild(card));
 
-      // ── 5. Image cards: force 2-column grid, 3 rows per page (=6 per page) ──
-      const grid = document.getElementById('cardsGrid');
-      const prevGridStyle = grid.style.cssText;
+  // Build page groups of 6 cards each (3 rows × 2 columns)
+  const pageGroups = [];
+  for (let i = 0; i < cards.length; i += 6) {
+    pageGroups.push(cards.slice(i, i + 6));
+  }
 
-      // We'll use CSS columns approach: wrap each pair of cards in a page-chunk div
-      const cards = Array.from(document.querySelectorAll('.img-card'));
-      const prevCardStyles = cards.map(c => c.style.cssText);
+  grid.style.display = 'block';
 
-      // Remove cards from grid temporarily
-      cards.forEach(card => grid.removeChild(card));
-
-      // Build page groups of 6 cards each (3 rows × 2 columns)
-      const pageGroups = [];
-      for (let i = 0; i < cards.length; i += 6) {
-        pageGroups.push(cards.slice(i, i + 6));
-      }
-
-      grid.style.display = 'block';
-
-      const groupDivs = [];
-      pageGroups.forEach((group, gi) => {
-        const groupDiv = document.createElement('div');
-        groupDiv.style.cssText = `
+  const groupDivs = [];
+  pageGroups.forEach((group, gi) => {
+    const groupDiv = document.createElement('div');
+    groupDiv.style.cssText = `
       display: block;
       width: 100%;
       page-break-before: ${gi === 0 ? 'auto' : 'always'};
       break-before: ${gi === 0 ? 'auto' : 'page'};
     `;
-        // Inner table-like layout: 2 per row
-        const innerDiv = document.createElement('div');
-        innerDiv.style.cssText = 'display:block;width:100%;';
+    // Inner table-like layout: 2 per row
+    const innerDiv = document.createElement('div');
+    innerDiv.style.cssText = 'display:block;width:100%;';
 
-        for (let row = 0; row < group.length; row += 2) {
-          const rowDiv = document.createElement('div');
-          rowDiv.style.cssText = 'display:block;width:100%;margin-bottom:8px;page-break-inside:avoid;break-inside:avoid;';
+    for (let row = 0; row < group.length; row += 2) {
+      const rowDiv = document.createElement('div');
+      rowDiv.style.cssText = 'display:block;width:100%;margin-bottom:8px;page-break-inside:avoid;break-inside:avoid;';
 
-          const left = group[row];
-          if (left) {
-            left.style.cssText = `
+      const left = group[row];
+      if (left) {
+        left.style.cssText = `
           display:inline-block;width:48%;vertical-align:top;
           margin-right:2%;page-break-inside:avoid;break-inside:avoid;
           border:2px solid #000;box-sizing:border-box;
         `;
-            rowDiv.appendChild(left);
-          }
-          const right = group[row + 1];
-          if (right) {
-            right.style.cssText = `
+        rowDiv.appendChild(left);
+      }
+      const right = group[row + 1];
+      if (right) {
+        right.style.cssText = `
           display:inline-block;width:48%;vertical-align:top;
           margin-left:2%;page-break-inside:avoid;break-inside:avoid;
           border:2px solid #000;box-sizing:border-box;
         `;
-            rowDiv.appendChild(right);
-          }
-          innerDiv.appendChild(rowDiv);
-        }
+        rowDiv.appendChild(right);
+      }
+      innerDiv.appendChild(rowDiv);
+    }
 
-        groupDiv.appendChild(innerDiv);
-        grid.appendChild(groupDiv);
-        groupDivs.push(groupDiv);
-      });
+    groupDiv.appendChild(innerDiv);
+    grid.appendChild(groupDiv);
+    groupDivs.push(groupDiv);
+  });
 
-      // ── 6. Add repeating header + page number via CSS @page + print styles ──
-      const styleTag = document.createElement('style');
-      styleTag.id = 'pdf-print-style';
-      styleTag.textContent = `
+  // ── 6. Add repeating header + page number via CSS @page + print styles ──
+  const styleTag = document.createElement('style');
+  styleTag.id = 'pdf-print-style';
+  styleTag.textContent = `
     @page {
       margin: 15mm 10mm 20mm 10mm;
       size: A4 portrait;
@@ -1286,128 +859,128 @@
     /* html2pdf doesn't support CSS running elements,
        so we handle header/footer via beforeEach page callback instead */
   `;
-      document.head.appendChild(styleTag);
+  document.head.appendChild(styleTag);
 
-      // ── 7. html2pdf options ──────────────────────────────────────────────────
-      const element = document.getElementById('mainPage');
+  // ── 7. html2pdf options ──────────────────────────────────────────────────
+  const element = document.getElementById('mainPage');
 
-      // Clone element to add header/footer on each page
-      const buyerVal = document.getElementById('buyer')?.querySelector('span')?.textContent
-        || document.getElementById('buyer')?.value || '';
+  // Clone element to add header/footer on each page
+  const buyerVal = document.getElementById('buyer')?.querySelector('span')?.textContent
+                || document.getElementById('buyer')?.value || '';
 
-      const opt = {
-        margin: [18, 10, 18, 10],    // top margin leaves room for header
-        filename: `Inspection_${buyerVal || 'Report'}_${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.97 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          scrollY: 0,
-          windowWidth: document.getElementById('mainPage').scrollWidth,
-          logging: false
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait'
-        },
-        pagebreak: {
-          mode: ['css', 'legacy'],
-          avoid: ['tr', '.img-card', '.section-header', 'thead']
-        }
-      };
-
-      // Use html2pdf worker so we can add header/footer with jsPDF after render
-      const worker = html2pdf().set(opt).from(element);
-
-      worker.toPdf().get('pdf').then(function (pdf) {
-        const totalPages = pdf.internal.getNumberOfPages();
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-
-        for (let pg = 1; pg <= totalPages; pg++) {
-          pdf.setPage(pg);
-
-          // ── Header bar on every page ──
-          pdf.setFillColor(255, 255, 255);
-          pdf.setDrawColor(0, 0, 0);
-          pdf.setLineWidth(0.5);
-          pdf.rect(10, 5, pageWidth - 20, 10, 'FD');       // white box
-          pdf.setFont('helvetica', 'bold');
-          pdf.setFontSize(13);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text('TEXTILE INSPECTION HUB', pageWidth / 2, 12, { align: 'center' });
-
-          // ── Footer: Page X of Y ──
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(9);
-          pdf.setTextColor(80, 80, 80);
-          pdf.text(
-            `Page ${pg} of ${totalPages}`,
-            pageWidth / 2,
-            pageHeight - 5,
-            { align: 'center' }
-          );
-
-          // ── Thin line above footer ──
-          pdf.setDrawColor(180, 180, 180);
-          pdf.setLineWidth(0.3);
-          pdf.line(10, pageHeight - 8, pageWidth - 10, pageHeight - 8);
-        }
-
-        return pdf;
-      }).save().then(() => {
-        restoreAll();
-        if (toast) toast.style.display = '';
-        showToast('✅ PDF Downloaded!', 'success');
-      }).catch(err => {
-        restoreAll();
-        if (toast) toast.style.display = '';
-        showToast('❌ PDF failed: ' + err.message, 'error');
-      });
-
-      // ── Restore everything ───────────────────────────────────────────────────
-      function restoreAll() {
-        // Restore hidden elements
-        hideEls.forEach(({ el, prop, prev }) => el.style[prop] = prev);
-
-        // Restore input/textarea
-        inputReplacements.forEach(({ span, input }) => {
-          input.style.display = '';
-          if (span.parentNode) span.parentNode.removeChild(span);
-        });
-
-        // Restore checkboxes
-        checkboxReplacements.forEach(({ span, input }) => {
-          input.style.display = '';
-          if (span.parentNode) span.parentNode.removeChild(span);
-        });
-
-        // Restore result highlights
-        Object.entries(resultMap).forEach(([key, id]) => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.style.outline = prevOutlines[id] || '';
-            el.style.opacity = '';
-            if (key === selectedResult) el.style.outline = '4px solid #000';
-          }
-        });
-
-        // Restore image cards
-        // Remove group divs from grid
-        groupDivs.forEach(gd => { if (gd.parentNode) gd.parentNode.removeChild(gd); });
-        // Restore cards to grid
-        cards.forEach((card, i) => {
-          card.style.cssText = prevCardStyles[i];
-          grid.appendChild(card);
-        });
-        grid.style.cssText = prevGridStyle;
-
-        // Remove print style
-        const ps = document.getElementById('pdf-print-style');
-        if (ps) ps.remove();
-      }
+  const opt = {
+    margin: [18, 10, 18, 10],    // top margin leaves room for header
+    filename: `Inspection_${buyerVal || 'Report'}_${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.97 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      scrollY: 0,
+      windowWidth: document.getElementById('mainPage').scrollWidth,
+      logging: false
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    },
+    pagebreak: {
+      mode: ['css', 'legacy'],
+      avoid: ['tr', '.img-card', '.section-header', 'thead']
     }
+  };
+
+  // Use html2pdf worker so we can add header/footer with jsPDF after render
+  const worker = html2pdf().set(opt).from(element);
+
+  worker.toPdf().get('pdf').then(function (pdf) {
+    const totalPages = pdf.internal.getNumberOfPages();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    for (let pg = 1; pg <= totalPages; pg++) {
+      pdf.setPage(pg);
+
+      // ── Header bar on every page ──
+      pdf.setFillColor(255, 255, 255);
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(10, 5, pageWidth - 20, 10, 'FD');       // white box
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('TEXTILE INSPECTION HUB', pageWidth / 2, 12, { align: 'center' });
+
+      // ── Footer: Page X of Y ──
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(
+        `Page ${pg} of ${totalPages}`,
+        pageWidth / 2,
+        pageHeight - 5,
+        { align: 'center' }
+      );
+
+      // ── Thin line above footer ──
+      pdf.setDrawColor(180, 180, 180);
+      pdf.setLineWidth(0.3);
+      pdf.line(10, pageHeight - 8, pageWidth - 10, pageHeight - 8);
+    }
+
+    return pdf;
+  }).save().then(() => {
+    restoreAll();
+    if (toast) toast.style.display = '';
+    showToast('✅ PDF Downloaded!', 'success');
+  }).catch(err => {
+    restoreAll();
+    if (toast) toast.style.display = '';
+    showToast('❌ PDF failed: ' + err.message, 'error');
+  });
+
+  // ── Restore everything ───────────────────────────────────────────────────
+  function restoreAll() {
+    // Restore hidden elements
+    hideEls.forEach(({ el, prop, prev }) => el.style[prop] = prev);
+
+    // Restore input/textarea
+    inputReplacements.forEach(({ span, input }) => {
+      input.style.display = '';
+      if (span.parentNode) span.parentNode.removeChild(span);
+    });
+
+    // Restore checkboxes
+    checkboxReplacements.forEach(({ span, input }) => {
+      input.style.display = '';
+      if (span.parentNode) span.parentNode.removeChild(span);
+    });
+
+    // Restore result highlights
+    Object.entries(resultMap).forEach(([key, id]) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.outline = prevOutlines[id] || '';
+        el.style.opacity = '';
+        if (key === selectedResult) el.style.outline = '4px solid #000';
+      }
+    });
+
+    // Restore image cards
+    // Remove group divs from grid
+    groupDivs.forEach(gd => { if (gd.parentNode) gd.parentNode.removeChild(gd); });
+    // Restore cards to grid
+    cards.forEach((card, i) => {
+      card.style.cssText = prevCardStyles[i];
+      grid.appendChild(card);
+    });
+    grid.style.cssText = prevGridStyle;
+
+    // Remove print style
+    const ps = document.getElementById('pdf-print-style');
+    if (ps) ps.remove();
+  }
+}
 
 
     // ─── Init ─────────────────────────────────────────────────────────────────
@@ -1417,5 +990,4 @@
     buildCards(defaultCards);
   </script>
 </body>
-
 </html>
