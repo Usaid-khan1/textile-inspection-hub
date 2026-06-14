@@ -423,63 +423,63 @@
     }
 
     function loadImageWithFallback(id, savedCard) {
-      // Use setTimeout so DOM is fully ready before we query prev_id
       setTimeout(function() {
         const prev = document.getElementById('prev_' + id);
-        if (!prev) { console.warn('[IMG] prev element not found for', id); return; }
+        if (!prev) return;
 
         const filename = (savedCard.filename || '').trim();
         const storedUrl = (savedCard.url || '').trim();
-
-        console.log('[IMG] Loading card:', id, '| filename:', filename, '| storedUrl:', storedUrl);
 
         if (!filename && !storedUrl) {
           prev.innerHTML = '<span style="color:#888;font-size:12px;">Click to add image</span>';
           return;
         }
 
-        // Build candidate URLs — skip empty strings
+        // storedUrl from DB is like "/uploads/img-xxx.jpeg"
+        // We must serve it from the SAME origin the app is running on.
+        // So just use storedUrl directly — browser will resolve it against current host.
+        // Only fallback: if storedUrl is somehow a full URL to a different host,
+        // also try the path part only.
         const candidates = [];
-        if (storedUrl)  candidates.push(storedUrl);                      // as stored in DB
-        if (filename)   candidates.push('/uploads/' + filename);          // standard Express static
-        if (filename)   candidates.push('/public/uploads/' + filename);   // alternate
-        if (filename)   candidates.push('/static/uploads/' + filename);   // another common path
-        if (storedUrl && !storedUrl.startsWith('http')) {
-          candidates.push(window.location.origin + (storedUrl.startsWith('/') ? storedUrl : '/' + storedUrl));
+
+        if (storedUrl) {
+          // Always try the relative path (strips any wrong host)
+          try {
+            const u = new URL(storedUrl, window.location.href);
+            // Use just the pathname so it resolves on current host
+            candidates.push(u.pathname);
+          } catch(e) {
+            candidates.push(storedUrl);
+          }
         }
 
-        // Dedupe, remove empty
-        const unique = [...new Set(candidates)].filter(u => u && u.trim() !== '');
-        console.log('[IMG] Will try URLs:', unique);
+        if (filename) candidates.push('/uploads/' + filename);
 
+        // Dedupe, remove empty
+        const unique = [...new Set(candidates)].filter(u => u);
         tryNextUrl(prev, unique, 0, filename);
       }, 0);
     }
 
     function tryNextUrl(prev, urls, index, filename) {
       if (index >= urls.length) {
-        console.warn('[IMG] All URLs failed for:', filename, '| tried:', urls);
-        prev.innerHTML = `<div style="text-align:center;padding:10px;">
+        prev.innerHTML = `<div style="text-align:center;padding:10px;cursor:pointer;">
           <div style="color:#c00;font-size:12px;margin-bottom:4px;">⚠ Image not found</div>
           <div style="color:#999;font-size:10px;">${escHtml(filename)}</div>
-          <div style="color:#555;font-size:9px;margin-top:4px;">Tried: ${urls.map(u=>'<br>'+u).join('')}</div>
           <div style="color:#aaa;font-size:9px;margin-top:4px;">Click to re-upload</div>
         </div>`;
         return;
       }
 
       const url = urls[index];
-      console.log('[IMG] Trying URL ' + (index+1) + '/' + urls.length + ':', url);
       const img = new Image();
       img.onload = function() {
-        console.log('[IMG] ✅ SUCCESS:', url);
         prev.innerHTML = '';
         prev.style.background = 'transparent';
         img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
         prev.appendChild(img);
       };
       img.onerror = function() {
-        console.warn('[IMG] ❌ Failed:', url);
         tryNextUrl(prev, urls, index + 1, filename);
       };
       img.src = url;
