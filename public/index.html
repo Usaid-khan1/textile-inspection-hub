@@ -830,27 +830,12 @@
       div.className = 'img-card';
       div.id = id;
 
-      // Build correct absolute URL for image
-      // savedCard.url is typically "/uploads/img-xxx.jpg" (relative)
-      // We resolve it against current origin so it always works
       const hasImage = savedCard && (savedCard.url || savedCard.filename);
-      let imgUrl = '';
-      if (hasImage) {
-        imgUrl = savedCard.url || '';
-        // If it's a relative path, make it absolute using current origin
-        if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('blob')) {
-          imgUrl = window.location.origin + (imgUrl.startsWith('/') ? imgUrl : '/' + imgUrl);
-        }
-      }
 
       div.innerHTML = `
         <button class="btn-remove" onclick="removeCard('${id}')">×</button>
         <div class="img-preview" id="prev_${id}" onclick="triggerFileInput('${id}')">
-          ${hasImage
-          ? `<img src="${escHtml(imgUrl)}" alt="img"
-                    onload="this.parentElement.style.background='transparent'"
-                    onerror="this.parentElement.innerHTML='<span style=\\'color:#c00;font-size:11px;\\'>⚠ Image not found<br><small>${escHtml(savedCard.filename || '')}</small></span>'">`
-          : `<span>Click to add image</span>`}
+          ${hasImage ? `<span style="font-size:11px;color:#888;">Loading image...</span>` : `<span>Click to add image</span>`}
         </div>
         <div class="img-caption"><input value="${escHtml(caption)}" placeholder="Caption..."></div>
         <div class="img-label-input"><input value="${escHtml(label)}" placeholder="Label / note below card..."></div>
@@ -864,7 +849,67 @@
           originalName: savedCard.originalName || '',
           mimetype: savedCard.mimetype || ''
         };
+        // Try loading image with multiple URL fallbacks
+        loadImageWithFallback(id, savedCard);
       }
+    }
+
+    function loadImageWithFallback(id, savedCard) {
+      const prev = document.getElementById('prev_' + id);
+      if (!prev) return;
+
+      const filename = savedCard.filename || '';
+      const storedUrl = savedCard.url || '';
+
+      // Build list of URLs to try in order
+      const urlsToTry = [];
+
+      // 1. Stored URL as-is (relative, browser resolves from current page)
+      if (storedUrl) urlsToTry.push(storedUrl);
+
+      // 2. /uploads/filename  (most common Express static setup)
+      if (filename) urlsToTry.push('/uploads/' + filename);
+
+      // 3. /public/uploads/filename
+      if (filename) urlsToTry.push('/public/uploads/' + filename);
+
+      // 4. Full origin + stored url
+      if (storedUrl && !storedUrl.startsWith('http')) {
+        urlsToTry.push(window.location.origin + (storedUrl.startsWith('/') ? storedUrl : '/' + storedUrl));
+      }
+
+      // Remove duplicates
+      const unique = [...new Set(urlsToTry)];
+
+      tryNextUrl(prev, unique, 0, filename);
+    }
+
+    function tryNextUrl(prev, urls, index, filename) {
+      if (index >= urls.length) {
+        // All URLs failed
+        prev.innerHTML = `<div style="text-align:center;padding:10px;">
+          <div style="color:#c00;font-size:12px;margin-bottom:4px;">⚠ Image not found</div>
+          <div style="color:#999;font-size:10px;">${escHtml(filename)}</div>
+          <div style="color:#aaa;font-size:9px;margin-top:4px;">Click to re-upload</div>
+        </div>`;
+        return;
+      }
+
+      const url = urls[index];
+      const img = new Image();
+      img.onload = function () {
+        prev.innerHTML = '';
+        prev.style.background = 'transparent';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        img.style.display = 'block';
+        prev.appendChild(img);
+      };
+      img.onerror = function () {
+        tryNextUrl(prev, urls, index + 1, filename);
+      };
+      img.src = url;
     }
     function triggerFileInput(id) { document.getElementById('file_' + id).click(); }
     async function uploadImage(id, input) {
