@@ -78,9 +78,12 @@
     .radio-group { display: flex; align-items: center; gap: 20px; }
     .radio-group label { display: flex; align-items: center; gap: 5px; margin: 0; margin-left: 8px; }
     .radio-group input { margin: 0; vertical-align: middle; }
-    .gen-table tr, .info-table tr, .sample-box tr, .remarks-area tr {
-    page-break-inside: avoid;
-    break-inside: avoid;}
+    @media print {
+  tr { page-break-inside: avoid !important; }
+}
+
+/* Ya directly (html2pdf ke liye better): */
+tr { page-break-inside: avoid; break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -821,7 +824,10 @@ function downloadPDF() {
       image       : { type:'jpeg', quality:0.97 },
       html2canvas : { scale:2, useCORS:true, scrollY:0, windowWidth:mainW, logging:false },
       jsPDF       : { unit:'mm', format:'a4', orientation:'portrait' },
-      pagebreak   : { mode:['css','legacy'], avoid:['tr','thead','.section-header'] }
+      pagebreak: { 
+  mode: ['css', 'legacy'], 
+  avoid: ['tr', 'thead', '.section-header', '.gen-table tr', '.info-table tr'] 
+}
     })
     .from(mainEl);
 
